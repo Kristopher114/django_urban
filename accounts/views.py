@@ -70,11 +70,6 @@ def customer_logout(request):
     messages.success(request, 'Logged out successfully.')
     return redirect('customer_login')
 
-# ── Dashboard Rendering ──────────────────────────────────────────────────────────
-@login_required
-def customer_dashboard(request):
-    return render(request, 'customers/dashboard.html')
-
 # ── Customer Profile ──────────────────────────────────────────────────────────
 
 @login_required
