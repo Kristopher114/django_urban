@@ -1,0 +1,241 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>URBAN - Customer Dashboard</title>
+
+<link rel="stylesheet" href="{% static 'customers/styles.css' %}">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+    margin:0;
+    font-family:'Poppins', sans-serif;
+    background:#1c1c1c;
+    color:white;
+}
+
+/* NAVBAR */
+
+.navbar{
+    background:#111;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px 40px;
+}
+
+.logo{
+    font-size:24px;
+    letter-spacing:3px;
+    font-weight:600;
+}
+
+.nav-links a{
+    color:white;
+    text-decoration:none;
+    margin-left:25px;
+    transition:.3s;
+}
+
+.nav-links a:hover{
+    color:#ff7a00;
+}
+
+/* HERO */
+
+.hero{
+    height:40vh;
+    background:url("{% static 'dashboard/hero.jpg' %}") center/cover;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    position:relative;
+}
+
+.hero::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+}
+
+.hero h1{
+    font-size:42px;
+    letter-spacing:4px;
+}
+
+.hero p{
+    color:#ccc;
+}
+
+/* MAIN */
+
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:50px 20px;
+}
+
+/* CARDS */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:#2c2c2c;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.4);
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+}
+
+.card h3{
+    margin-top:0;
+}
+
+.btn{
+    display:inline-block;
+    margin-top:10px;
+    background:#ff7a00;
+    padding:10px 18px;
+    border-radius:6px;
+    text-decoration:none;
+    color:white;
+    font-weight:500;
+}
+
+.btn:hover{
+    background:#e66900;
+}
+
+/* ORDERS */
+
+.orders{
+    margin-top:50px;
+}
+
+.order-card{
+    background:#2c2c2c;
+    padding:20px;
+    border-radius:10px;
+    margin-bottom:15px;
+}
+
+/* FOOTER */
+
+footer{
+    background:#111;
+    text-align:center;
+    padding:20px;
+    color:#aaa;
+    font-size:14px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<div class="navbar">
+
+<div class="logo">URBAN</div>
+
+<div class="nav-links">
+<a href="#">Menu</a>
+<a href="#">My Orders</a>
+<a href="{%url 'customer_profile'%}">Profile</a>
+<a href="{%url 'customer_logout'%}">Logout</a>
+</div>
+
+</div>
+
+
+<!-- HERO -->
+
+<section class="hero">
+
+<div class="hero-content">
+    <h1>Welcome Back</h1>
+    <p>Order your favorites quickly and easily</p>
+</div>
+
+</section>
+
+
+<!-- MENU CATEGORIES -->
+
+<div class="container">
+
+<h2>Browse Categories</h2>
+
+    <div class="grid">
+        
+        {% for category in categories %}
+            <div class="card">
+                <h3>{{ category.name }}</h3>
+                <p>{{ category.description }}</p>
+                <a href="#" class="btn">View Menu</a>
+            </div>
+        {% empty %}
+            <p>No categories available yet. Please add some in the admin panel.</p>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+<!-- RECENT ORDERS -->
+
+<div class="orders">
+
+<h2>Recent Orders</h2>
+
+<div class="order-card">
+<strong>Order #1023</strong>
+<p>Latte + Croissant</p>
+<small>Status: Preparing</small>
+</div>
+
+<div class="order-card">
+<strong>Order #1021</strong>
+<p>Caramel Macchiato</p>
+<small>Status: Completed</small>
+</div>
+
+</div>
+
+</div>
+
+
+<footer>
+
+<p>© 2026 URBAN. All Rights Reserved.</p>
+<p>123 Main St | (123) 456-7890</p>
+
+</footer>
+
+</body>
+</html>

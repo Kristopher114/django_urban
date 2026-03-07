@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URBAN - Customer Portal</title>
+    <link rel="stylesheet" href="{% static 'customers/styles.css' %}">
+</head>
+<body>
+    <section class="hero">
+        <div class="hero-overlay">
+            <div class="hero-content">
+                <h1 class="logo">URBAN</h1>
+                <p class="tagline">Experience the Urban Ordering Difference</p>
+                <a href="#login" class="cta-button">Portal</a> 
+            </div>
+        </div>
+    </section>
+
+    {% block content %}
+    <section class="form-section" id="login">
+        <div class="form-container">
+            <h2>Customer Login</h2>
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="error">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+            <form method="post" action="{% url 'customer_login' %}">
+                {% csrf_token %}
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <p class="redirect">Don't have an account? <a href="{% url 'register' %}">Register Here</a></p>
+        </div>
+    </section>
+    {% endblock %}
+
+    <footer>
+        <p>© 2026 URBAN. All Rights Reserved.</p>
+        <p>Andres Bonifacio National Highway San Miguel, Iligan City, Philippines, 9200</p>
+        <p>(123) 456-7890</p>
+    </footer>
+</body>
+</html>

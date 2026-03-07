@@ -1,0 +1,29 @@
+{% extends 'customers/login.html' %}
+{% load static %}
+
+{% block content %}
+<section class="form-section" id="register">
+    <div class="form-container">
+        <h2>Customer Registration</h2>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <p class="error">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="{% url 'register' %}">
+            {% csrf_token %}
+            
+            <h3>User Info</h3>
+            {{ user_form.as_p }}
+            
+            <h3>Customer Info</h3>
+            {{ customer_form.as_p }}
+            
+            <button type="submit">Register</button>
+        </form>
+        <p class="redirect">Already have an account? <a href="{% url 'customer_login' %}">Login Here</a></p>
+    </div>
+</section>
+{% endblock %}
