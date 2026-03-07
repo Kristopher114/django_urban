@@ -163,7 +163,7 @@ footer{
 <div class="logo">URBAN</div>
 
 <div class="nav-links">
-<a href="#">Menu</a>
+<a href="{% url 'products:menu_list' %}">Menu</a>
 <a href="#">My Orders</a>
 <a href="{%url 'customer_profile'%}">Profile</a>
 <a href="{%url 'customer_logout'%}">Logout</a>
@@ -185,7 +185,7 @@ footer{
 
 
 <!-- MENU CATEGORIES -->
-
+{% block content %}
 <div class="container">
 
 <h2>Browse Categories</h2>
@@ -229,7 +229,7 @@ footer{
 
 </div>
 
-
+{% endblock %}
 <footer>
 
 <p>© 2026 URBAN. All Rights Reserved.</p>

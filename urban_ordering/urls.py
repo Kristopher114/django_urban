@@ -19,7 +19,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('dashboards.urls')),
-    path('', include('accounts.urls')),
-    path('', include('products.urls')),
+    path('', include('dashboards.urls')),         # Keeps dashboard/home at the root "127.0.0.1:8000/"
+    path('accounts/', include('accounts.urls')),  # Moves accounts to "127.0.0.1:8000/accounts/..."
+    path('menu/', include('products.urls')),      # Moves products to "127.0.0.1:8000/menu/..."
 ]

@@ -4,5 +4,6 @@ from . import views
 app_name = 'products'
 
 urlpatterns = [
-    path('', views.home, name='menu'),
+    # Pointing to views.menu_list instead of views.home
+    path('', views.menu_list, name='menu_list'), 
 ]

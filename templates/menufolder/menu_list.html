@@ -1,0 +1,23 @@
+{% extends 'customers/dashboard.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2>Our Menu</h2>
+    
+    <div class="grid">
+        {% for product in products %}
+            <div class="card">
+                <h3>{{ product.name }}</h3>
+                <p>{{ product.description }}</p>
+                <p><strong>Price:</strong> ₱{{ product.price }}</p>
+                <small>Stock: {{ product.stock_quantity }}</small>
+                <br>
+                <a href="#" class="btn">Add to Cart</a>
+            </div>
+        {% empty %}
+            <p>No menu items available right now. Please check back later!</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

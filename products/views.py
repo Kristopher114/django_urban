@@ -1,12 +1,14 @@
 from django.shortcuts import render
-from .models import Category # Don't forget to import your model!
+from .models import Category, Product  # Import both models!
 
-def home(request):
-    # Fetch all categories from the database
+def menu_list(request):
+    # Fetch all categories and products from the database
     categories = Category.objects.all()
+    products = Product.objects.all()
     
-    # Pass them to the template in the context dictionary
+    # Pass them to the template
     context = {
-        'categories': categories
+        'categories': categories,
+        'products': products
     }
-    return render(request, 'customers/dashboard.html', context)
+    return render(request, 'menufolder/menu_list.html', context)
