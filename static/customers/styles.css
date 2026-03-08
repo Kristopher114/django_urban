@@ -1,4 +1,4 @@
-/* --- Global Reset --- */
+/* --- Global Reset & Variables --- */
 * {
     margin: 0;
     padding: 0;
@@ -6,146 +6,249 @@
     font-family: 'Poppins', sans-serif;
 }
 
+:root {
+    --bg-dark: #121212;
+    --bg-card: #1e1e1e;
+    --bg-input: #2a2a2a;
+    --accent: #ff7a00;
+    --accent-hover: #e66900;
+    --text-main: #e0e0e0;
+    --text-muted: #888888;
+    --border-color: #333333;
+}
+
 body {
-    background: #1c1c1c;
-    color: #fff;
+    background: var(--bg-dark);
+    color: var(--text-main);
     line-height: 1.6;
 }
 
-/* --- Hero Section --- */
-.hero {
-    background: url('../images/branch.jpg') center/cover no-repeat;
-    height: 60vh;
-    position: relative;
+/* --- Typography & Buttons --- */
+h2, h3 { color: #ffffff; }
+
+.btn, button {
+    display: inline-block;
+    width: 100%;
+    padding: 12px 20px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.hero-overlay {
-    background: rgba(0,0,0,0.6);
-    width: 100%;
-    height: 100%;
+.btn:hover, button:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 122, 0, 0.2);
+}
+
+/* --- Navbar (Authenticated Pages) --- */
+.navbar {
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 50px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo, .navbar .logo a {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.navbar .logo a:hover { color: var(--accent); }
+
+.nav-links a {
+    color: var(--text-main);
+    text-decoration: none;
+    margin-left: 30px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.nav-links a:hover { color: var(--accent); }
+
+/* --- Hero Sections --- */
+.hero {
+    height: 35vh;
+    background: url('../images/branch.jpg') center/cover no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
+    position: relative;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.5), var(--bg-dark));
 }
 
 .hero-content {
-    text-align: center;
+    position: relative;
+    z-index: 2;
+    padding: 0 20px;
 }
 
-.logo {
-    font-size: 3rem;
+.hero h1 {
+    font-size: 42px;
     letter-spacing: 3px;
-    color: #fff;
-}
-
-.tagline {
-    margin: 10px 0 20px;
-    font-size: 1.2rem;
-}
-
-.cta-button {
-    padding: 12px 30px;
-    background: #ff7a00;
-    color: #fff;
-    text-decoration: none;
-    font-weight: bold;
-    border-radius: 5px;
-    transition: background 0.3s;
-}
-
-.cta-button:hover {
-    background: #e56b00;
-}
-
-/* --- Form Section --- */
-.form-section {
-    display: flex;
-    justify-content: center;
-    padding: 50px 20px;
-    background: #2c2c2c;
-}
-
-.form-container {
-    background: #1f1f1f;
-    padding: 30px;
-    border-radius: 10px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
-}
-
-.form-container h2, .form-container h3 {
-    margin-bottom: 15px;
-    text-align: center;
-    color: #fff;
-}
-
-input {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 5px;
-    border: none;
-}
-
-button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 10px;
-    background: #ff7a00;
-    color: #fff;
-    border: none;
-    font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-button:hover {
-    background: #e56b00;
-}
-
-.error {
-    color: #ff4c4c;
-    text-align: center;
     margin-bottom: 10px;
 }
 
-.redirect {
-    margin-top: 15px;
-    text-align: center;
+.hero p.tagline { color: #ccc; font-size: 16px; margin-bottom: 20px;}
+
+/* --- Main Layout & Cards --- */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 40px 20px;
 }
 
-.redirect a {
-    color: #ff7a00;
-    text-decoration: none;
-    font-weight: bold;
+.container h2 {
+    font-size: 24px;
+    margin-bottom: 25px;
+    border-left: 4px solid var(--accent);
+    padding-left: 10px;
 }
 
-.redirect a:hover {
-    text-decoration: underline;
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
 }
+
+.card {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+    box-shadow: 0 8px 25px rgba(255, 122, 0, 0.1);
+}
+
+.card h3 { margin-bottom: 10px; font-size: 20px; }
+.card p { color: var(--text-muted); font-size: 14px; margin-bottom: 15px; flex-grow: 1; }
+
+/* --- Forms (Login & Register) --- */
+.form-section {
+    display: flex;
+    justify-content: center;
+    padding: 60px 20px;
+}
+
+.form-container {
+    background: var(--bg-card);
+    padding: 40px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 450px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.form-container h2 { text-align: center; margin-bottom: 20px; border: none; padding: 0;}
+.form-container h3 { margin: 20px 0 10px; font-size: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
+
+input, select, textarea {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: white;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.3s;
+}
+
+input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(255, 122, 0, 0.2);
+}
+
+.error { color: #ff4c4c; text-align: center; margin-bottom: 15px; font-size: 14px; background: rgba(255, 76, 76, 0.1); padding: 10px; border-radius: 6px;}
+
+.redirect { margin-top: 20px; text-align: center; font-size: 14px; color: var(--text-muted); }
+.redirect a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.redirect a:hover { text-decoration: underline; }
+
+/* --- Orders List --- */
+.orders { margin-top: 50px; }
+.order-card {
+    background: var(--bg-card);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.order-card strong { color: white; display: block; margin-bottom: 5px; }
+.order-card p { color: var(--text-muted); font-size: 14px; }
+.status { background: rgba(255,122,0,0.1); color: var(--accent); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
 
 /* --- Footer --- */
 footer {
-    background: #111;
+    background: #0a0a0a;
     text-align: center;
-    padding: 15px;
-    font-size: 0.9rem;
-    color: #aaa;
+    padding: 30px 20px;
+    color: var(--text-muted);
+    font-size: 13px;
+    border-top: 1px solid var(--border-color);
+    margin-top: auto;
 }
+footer p { margin-bottom: 5px; }
 
-/* --- Responsive --- */
-@media(max-width:768px) {
-    .hero {
-        height: 40vh;
-    }
-
-    .logo {
-        font-size: 2rem;
-    }
-
-    .cta-button {
-        padding: 10px 25px;
-    }
+.field-error {
+    color: #ff4c4c;
+    font-size: 12px;
+    display: block;
+    margin-top: -10px; /* Pulls the error text closer to the input */
+    margin-bottom: 15px;
+}
+.field-error ul {
+    list-style-type: none; /* Removes the bullet points Django adds to errors */
+}
+/* --- Card Images --- */
+.card-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover; /* Prevents stretching by cropping nicely */
+    border-radius: 8px;
+    margin-bottom: 15px;
+    background-color: var(--bg-input); /* A nice fallback background color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 14px;
 }

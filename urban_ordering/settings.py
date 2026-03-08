@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os # Make sure this is at the very top of settings.py!
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -122,3 +123,14 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/stable/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# The URL that the browser will use to access the image
+MEDIA_URL = '/media/'
+
+# The actual folder on your computer where the files will be saved
+MEDIA_ROOT = BASE_DIR / 'media'

@@ -2,27 +2,66 @@
 {% load static %}
 
 {% block content %}
-<section class="form-section" id="register">
+<section class="form-section">
     <div class="form-container">
         <h2>Customer Registration</h2>
         
         {% if messages %}
             {% for message in messages %}
-                <p class="error">{{ message }}</p>
+                <div class="error">{{ message }}</div>
             {% endfor %}
         {% endif %}
 
-        <form method="POST" action="{% url 'register' %}">
+        <form method="POST" action="{% url 'register' %}" class="django-form">
             {% csrf_token %}
             
-            <h3>User Info</h3>
-            {{ user_form.as_p }}
+            <h3>Account Details</h3>
+            <div class="input-group">
+                {{ user_form.username }}
+                <span class="field-error">{{ user_form.username.errors }}</span>
+            </div>
+
+            <div class="input-group">
+                {{ user_form.email }}
+                <span class="field-error">{{ user_form.email.errors }}</span>
+            </div>
+
+            <div class="input-group">
+                {{ user_form.password1 }}
+                <span class="field-error">{{ user_form.password1.errors }}</span>
+            </div>
+
+            <div class="input-group">
+                {{ user_form.password2 }}
+                <span class="field-error">{{ user_form.password2.errors }}</span>
+            </div>
             
-            <h3>Customer Info</h3>
-            {{ customer_form.as_p }}
+            <h3>Delivery Information</h3>
             
-            <button type="submit">Register</button>
+            <div style="display: flex; gap: 15px;">
+                <div class="input-group" style="flex: 1;">
+                    {{ customer_form.first_name }}
+                    <span class="field-error">{{ customer_form.first_name.errors }}</span>
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    {{ customer_form.last_name }}
+                    <span class="field-error">{{ customer_form.last_name.errors }}</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                {{ customer_form.phone }}
+                <span class="field-error">{{ customer_form.phone.errors }}</span>
+            </div>
+
+            <div class="input-group">
+                {{ customer_form.address }}
+                <span class="field-error">{{ customer_form.address.errors }}</span>
+            </div>
+            
+            <button type="submit" style="margin-top: 10px;">Register Account</button>
         </form>
+        
         <p class="redirect">Already have an account? <a href="{% url 'customer_login' %}">Login Here</a></p>
     </div>
 </section>

@@ -5,6 +5,8 @@ urlpatterns = [
     path('login/',  views.customer_login, name='customer_login'),
     path('logout/', views.customer_logout, name='customer_logout'),
     path('dashboard/', views.customer_dashboard, name='customer_dashboard'),
+    # 2. The specific menu list page
+    path('dashboard/<str:category_name>/', views.menu_list_view, name='menu_list'),
 
     path('register/', views.register, name='register'),
 

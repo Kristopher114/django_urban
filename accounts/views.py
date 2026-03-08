@@ -4,21 +4,36 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import Customer
 from .forms import UserRegisterForm, CustomerForm
-from products.models import Category 
+from products.models import Category, Product
 
 
 @login_required
 def customer_dashboard(request):
-    # 2. Query the database here
+    # Just grab all categories for the main page
     categories = Category.objects.all()
     
-    # 3. Pass it to the context
     context = {
-        'categories': categories
+        'categories': categories,
+    }
+    return render(request, 'customers/dashboard.html', context)
+# --- VIEW 2: The Specific Menu List ---
+
+@login_required
+def menu_list_view(request, category_name):
+    # 1. Find the specific category
+    category = get_object_or_404(Category, name__iexact=category_name)
+    
+    # 2. Grab all products that belong to this specific category
+    # (This assumes your Product model has a ForeignKey called 'category')
+    products = Product.objects.filter(category=category)
+    
+    # 3. Pass BOTH the category and the products to the HTML
+    context = {
+        'category': category,
+        'products': products, 
     }
     
-    # 4. Render the template with the context
-    return render(request, 'customers/dashboard.html', context)
+    return render(request, 'menufolder/menu_list.html', context)
 
 # ── Register New Customer ──────────────────────────────────────────────────────
 def register(request):
