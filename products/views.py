@@ -30,7 +30,9 @@ def product_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Product added successfully!')
-            return redirect('inventory_list')
+            
+            # Fixed! We told Django exactly which app the URL belongs to.
+            return redirect('products:inventory_list')
     else:
         form = ProductForm()
 
