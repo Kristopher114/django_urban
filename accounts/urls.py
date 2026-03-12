@@ -2,17 +2,19 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('login/',  views.customer_login, name='customer_login'),
+    # --- Customer URLs ---
+    path('login/', views.customer_login, name='customer_login'),
     path('logout/', views.customer_logout, name='customer_logout'),
     path('dashboard/', views.customer_dashboard, name='customer_dashboard'),
-    # 2. The specific menu list page
     path('dashboard/<str:category_name>/', views.menu_list_view, name='menu_list'),
-
     path('register/', views.register, name='register'),
+    path('profile/', views.customer_profile, name='customer_profile'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
 
-    path('profile/',              views.customer_profile, name='customer_profile'),
-    path('profile/edit/',         views.edit_profile,     name='edit_profile'),
-    path('customers/',            views.customer_list,    name='customer_list'),
-    path('customers/<int:pk>/',   views.customer_detail,  name='customer_detail'),
-    path('customers/<int:pk>/delete/', views.delete_customer, name='delete_customer'),
+    # --- Staff / Admin URLs ---
+    path('staff/login/', views.staff_login, name='staff_login'), # Changed to staff/login/ for clarity
+    path('staff/dashboard/', views.admin_dashboard, name='admin_dashboard'), # Added this!
+    path('staff/customers/', views.customer_list, name='customer_list'),
+    path('staff/customers/<int:pk>/', views.customer_detail, name='customer_detail'),
+    path('staff/customers/<int:pk>/delete/', views.delete_customer, name='delete_customer'),
 ]

@@ -116,6 +116,47 @@ def edit_profile(request):
 
 
 # ── Admin / Staff Views ───────────────────────────────────────────────────────
+# ── Admin / Staff Views ───────────────────────────────────────────────────────
+
+def staff_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Check if the user exists in the database
+        user = authenticate(request, username=username, password=password)
+        
+        # Make sure the user exists AND is a staff member
+        if user is not None and user.is_staff:
+            login(request, user)
+            return redirect('admin_dashboard') # Redirects to the dashboard URL
+        else:
+            # Tell the user if they messed up!
+            messages.error(request, 'Invalid credentials or you do not have staff access.')
+
+    return render(request, 'staff/staff_login.html')
+
+@login_required
+def admin_dashboard(request):
+    """The POS dashboard for staff members."""
+    if not request.user.is_staff:
+        messages.error(request, 'Access denied.')
+        return redirect('customer_profile')
+        
+    # 1. Grab all categories
+    categories = Category.objects.all()
+    
+    # 2. Grab all products (select_related speeds up the database query)
+    products = Product.objects.select_related('category').all()
+    
+    context = {
+        'categories': categories,
+        'products': products,
+    }
+        
+    return render(request, 'staff/admin_dashboard.html', context)
+
+# ... Keep your customer_list, customer_detail, and delete_customer views exactly as they are!
 
 @login_required
 def customer_list(request):
@@ -136,7 +177,7 @@ def customer_detail(request, pk):
         return redirect('customer_profile')
 
     customer = get_object_or_404(Customer, pk=pk)
-    return render(request, 'customers/customer_detail.html', {'customer': customer})
+    return render(request, 'staff/customer_detail.html', {'customer': customer})
 
 
 @login_required

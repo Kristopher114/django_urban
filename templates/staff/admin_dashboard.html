@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URBAN POS - Staff Dashboard</title>
+    
+    <link rel="stylesheet" href="{% static 'staff/staff.css' %}">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+    <div class="pos-container">
+        
+        <aside class="pos-sidebar">
+            <div class="pos-logo">URBAN<span>.</span></div>
+            
+            <a href="#" class="nav-item active"><i class="fa-solid fa-cash-register"></i> POS</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-receipt"></i> Orders</a>
+            <a href="{% url 'customer_list' %}" class="nav-item"><i class="fa-solid fa-users"></i> Customers</a>
+            <a href="{% url 'products:inventory_list' %}" class="nav-item"><i class="fa-solid fa-box"></i> Inventory</a>
+            
+            <div class="spacer"></div>
+            
+            <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+            <a href="{% url 'customer_logout' %}" class="nav-item" style="color: #ff4c4c;"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+        </aside>
+
+        <main class="pos-menu">
+            <div class="menu-header">
+                <h2 style="color: white; font-weight: 500;">New Order</h2>
+                <input type="text" placeholder="Search menu...">
+            </div>
+
+            <div class="category-pills">
+                <div class="pill active" data-category="all">All Items</div>
+                
+                {% for category in categories %}
+                    <div class="pill" data-category="{{ category.id }}">{{ category.name }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="product-grid">
+                
+                {% for product in products %}
+                    <div class="product-card" data-category="{{ product.category.id }}">
+                        
+                        {% if product.product_image %}
+                            <img src="{{ product.product_image.url }}" class="product-img" alt="{{ product.name }}">
+                        {% else %}
+                            <div class="product-img" style="display: flex; align-items: center; justify-content: center; font-size: 12px; color: #666;">No Img</div>
+                        {% endif %}
+                        
+                        <h4>{{ product.name }}</h4>
+                        <p>₱{{ product.price }}</p>
+                    </div>
+                {% empty %}
+                    <p style="color: var(--text-muted); grid-column: 1 / -1;">No products found in inventory.</p>
+                {% endfor %}
+                
+            </div>
+        </main>
+
+        <aside class="pos-ticket">
+            
+            <div class="ticket-header">
+                <h3 style="color: white; margin-bottom: 5px;">Current Ticket</h3>
+                <p style="color: var(--text-muted); font-size: 13px;">Order #10045 • Walk-in</p>
+            </div>
+
+            <div class="ticket-items">
+                <div class="cart-item">
+                    <div class="cart-info">
+                        <h5>Caffe Latte</h5>
+                        <p>₱150.00</p>
+                    </div>
+                    <div class="qty-controls">
+                        <button class="qty-btn"><i class="fa-solid fa-minus"></i></button>
+                        <span style="color: white; font-weight: 600;">2</span>
+                        <button class="qty-btn"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <div class="cart-item">
+                    <div class="cart-info">
+                        <h5>Butter Croissant</h5>
+                        <p>₱120.00</p>
+                    </div>
+                    <div class="qty-controls">
+                        <button class="qty-btn"><i class="fa-solid fa-minus"></i></button>
+                        <span style="color: white; font-weight: 600;">1</span>
+                        <button class="qty-btn"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ticket-summary">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>₱420.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax (12%)</span>
+                    <span>₱50.40</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>₱470.40</span>
+                </div>
+                
+                <button class="btn-checkout">Pay / Checkout</button>
+            </div>
+
+        </aside>
+
+    </div>
+
+</body>
+</html>
+
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Grab all the pills and product cards from the screen
+            const categoryPills = document.querySelectorAll('.pill');
+            const productCards = document.querySelectorAll('.product-card');
+
+            // Add a click listener to every single pill
+            categoryPills.forEach(pill => {
+                pill.addEventListener('click', function() {
+                    
+                    // 1. Remove the 'active' orange color from all pills...
+                    categoryPills.forEach(p => p.classList.remove('active'));
+                    // ...and add it only to the one we just clicked!
+                    this.classList.add('active');
+
+                    // 2. Find out which category ID we just clicked
+                    const selectedCategory = this.getAttribute('data-category');
+
+                    // 3. Loop through every product on the screen
+                    productCards.forEach(card => {
+                        const productCategory = card.getAttribute('data-category');
+
+                        // If we clicked 'All Items' OR if the IDs match, show the card
+                        if (selectedCategory === 'all' || selectedCategory === productCategory) {
+                            card.style.display = 'block';
+                        } else {
+                            // Otherwise, hide the card instantly!
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        });
+    </script>

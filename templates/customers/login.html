@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>URBAN - Customer Portal</title>
+    {%block title%}<title>URBAN - Customer Portal</title>{%endblock%}
     <link rel="stylesheet" href="{% static 'customers/styles.css' %}">
 </head>
 <body>
@@ -34,6 +34,7 @@
             </form>
             
             <p class="redirect">Don't have an account? <a href="{% url 'register' %}">Register Here</a></p>
+            <p class="redirect"><a href="{% url 'staff_login' %}" target = "_blank">Login as Admin</a></p>
         </div>
     </section>
     {% endblock %}
