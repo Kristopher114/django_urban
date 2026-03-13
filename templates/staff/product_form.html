@@ -1,157 +1,127 @@
+{% extends 'staff/admin_dashboard.html' %} 
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>URBAN POS - {{ title }}</title>
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background: var(--bg-panel);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 40px;
+        max-width: 700px;
+        margin: 0 auto; /* Centers the form on the screen */
+    }
+
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 20px;
+    }
+
+    .btn-back {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+    .btn-back:hover { color: white; text-decoration: underline; }
+
+    /* Form Labels */
+    label {
+        display: block;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Two-column layout for side-by-side inputs */
+    .form-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 15px;
+    }
+    .form-col { flex: 1; }
+
+    .btn-save {
+        width: 100%;
+        background: var(--accent);
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 20px;
+    }
+    .btn-save:hover { background: var(--accent-hover); }
+
+    .field-error { color: #ff4c4c; font-size: 12px; margin-top: -10px; margin-bottom: 15px; display: block; }
+    .field-error ul { list-style: none; padding: 0; }
+</style>
+{% endblock %} {% block content %}
+<main class="inventory-content" style="flex: 1; padding: 30px; overflow-y: auto; background: var(--bg-dark);">
     
-    <link rel="stylesheet" href="{% static 'staff/staff.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        .form-container {
-            background: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 40px;
-            max-width: 700px;
-            margin: 0 auto; /* Centers the form on the screen */
-        }
-
-        .form-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 20px;
-        }
-
-        .btn-back {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-        .btn-back:hover { color: white; }
-
-        /* Form Labels */
-        label {
-            display: block;
-            color: var(--text-muted);
-            font-size: 13px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Two-column layout for side-by-side inputs */
-        .form-row {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-        .form-col { flex: 1; }
-
-        .btn-save {
-            width: 100%;
-            background: var(--accent);
-            color: white;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 20px;
-        }
-        .btn-save:hover { background: var(--accent-hover); }
-
-        .field-error { color: #ff4c4c; font-size: 12px; margin-top: -10px; margin-bottom: 15px; display: block; }
-        .field-error ul { list-style: none; padding: 0; }
-    </style>
-</head>
-<body>
-
-    <div class="pos-container">
-        
-        <aside class="pos-sidebar">
-            <div class="pos-logo">URBAN<span>.</span></div>
+    <div class="form-container">
+        <div class="form-header">
+            <h2 style="color: white; font-weight: 500;">{{ title }}</h2>
             
-            <a href="{% url 'admin_dashboard' %}" class="nav-item"><i class="fa-solid fa-cash-register"></i> POS</a>
-            <a href="#" class="nav-item"><i class="fa-solid fa-receipt"></i> Orders</a>
-            <a href="{% url 'customer_list' %}" class="nav-item"><i class="fa-solid fa-users"></i> Customers</a>
-            
-            <a href="{% url 'products:inventory_list' %}" class="nav-item active"><i class="fa-solid fa-box"></i> Inventory</a>
-            
-            <div class="spacer"></div>
-            
-            <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
-            <a href="{% url 'customer_logout' %}" class="nav-item" style="color: #ff4c4c;"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
-        </aside>
+            <a href="{% url 'products:inventory_list' %}" class="btn-back">← Back to Inventory</a>
+        </div>
 
-        <main class="inventory-content">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
             
-            <div class="form-container">
-                <div class="form-header">
-                    <h2 style="color: white; font-weight: 500;">{{ title }}</h2>
-                    <a href="{% url 'products:inventory_list' %}" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Back to Inventory</a>
+            <div class="form-row">
+                <div class="form-col">
+                    <label>Product Name</label>
+                    {{ form.name }}
+                    <span class="field-error">{{ form.name.errors }}</span>
                 </div>
-
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    
-                    <div class="form-row">
-                        <div class="form-col">
-                            <label>Product Name</label>
-                            {{ form.name }}
-                            <span class="field-error">{{ form.name.errors }}</span>
-                        </div>
-                        <div class="form-col">
-                            <label>Category</label>
-                            {{ form.category }}
-                            <span class="field-error">{{ form.category.errors }}</span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label>Description</label>
-                        {{ form.description }}
-                        <span class="field-error">{{ form.description.errors }}</span>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-col">
-                            <label>Price (₱)</label>
-                            {{ form.price }}
-                            <span class="field-error">{{ form.price.errors }}</span>
-                        </div>
-                        <div class="form-col">
-                            <label>Initial Stock Quantity</label>
-                            {{ form.stock_quantity }}
-                            <span class="field-error">{{ form.stock_quantity.errors }}</span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label>Product Image (Optional)</label>
-                        <div style="background: var(--bg-surface); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px;">
-                            {{ form.product_image }}
-                        </div>
-                        <span class="field-error">{{ form.product_image.errors }}</span>
-                    </div>
-
-                    <button type="submit" class="btn-save">Save Product</button>
-                </form>
-
+                <div class="form-col">
+                    <label>Category</label>
+                    {{ form.category }}
+                    <span class="field-error">{{ form.category.errors }}</span>
+                </div>
             </div>
 
-        </main>
+            <div>
+                <label>Description</label>
+                {{ form.description }}
+                <span class="field-error">{{ form.description.errors }}</span>
+            </div>
 
+            <div class="form-row">
+                <div class="form-col">
+                    <label>Price (₱)</label>
+                    {{ form.price }}
+                    <span class="field-error">{{ form.price.errors }}</span>
+                </div>
+                <div class="form-col">
+                    <label>Initial Stock Quantity</label>
+                    {{ form.stock_quantity }}
+                    <span class="field-error">{{ form.stock_quantity.errors }}</span>
+                </div>
+            </div>
+
+            <div>
+                <label>Product Image (Optional)</label>
+                <div style="background: var(--bg-surface); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px;">
+                    {{ form.product_image }}
+                </div>
+                <span class="field-error">{{ form.product_image.errors }}</span>
+            </div>
+
+            <button type="submit" class="btn-save">Save Product</button>
+        </form>
     </div>
 
-</body>
-</html>
+</main>
+{% endblock %}

@@ -4,6 +4,18 @@ from django.contrib import messages
 from .models import Category, Product  # Import both models!
 from .forms import ProductForm
 
+def menu_list(request):
+    # Fetch all categories and products from the database
+    categories = Category.objects.all()
+    products = Product.objects.all()
+    
+    # Pass them to the template
+    context = {
+        'categories': categories,
+        'products': products
+    }
+    return render(request, 'menufolder/menu_list.html', context)
+
 @login_required
 def inventory_list(request):
     """Staff view to see all products in the inventory."""
@@ -42,16 +54,36 @@ def product_create(request):
     }
     return render(request, 'staff/product_form.html', context)
 
+@login_required
+def edit_product(request, pk):
+    # 1. Kick out non-staff members
+    if not request.user.is_staff:
+        return redirect('dashboard')
 
-def menu_list(request):
-    # Fetch all categories and products from the database
-    categories = Category.objects.all()
-    products = Product.objects.all()
-    
-    # Pass them to the template
+    # 2. Grab the specific product from the database
+    product = get_object_or_404(Product, pk=pk)
+
+    # 3. Handle the form
+    if request.method == 'POST':
+        # CRITICAL: Pass 'instance=product' so Django updates it instead of duplicating it
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'{product.name} updated successfully!')
+            return redirect('products:inventory_list')
+
+    else:
+        # Pre-fill the form with the current product's data
+        form = ProductForm(instance=product)
+
+    # 4. Pass the data to your HTML
     context = {
-        'categories': categories,
-        'products': products
+        'form': form,
+        # A nice touch: Make the title dynamic based on the product name!
+        'title': f'Edit {product.name}' 
     }
-    return render(request, 'menufolder/menu_list.html', context)
+    
+    # Notice I changed this back to 'products/product_form.html' assuming that is where you saved it!
+    return render(request, 'staff/product_form.html', context)
 

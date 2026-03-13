@@ -1,148 +1,120 @@
+{% extends 'staff/admin_dashboard.html' %} 
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>URBAN POS - Inventory</title>
+
+{% block extra_css %}
+<style>
+    .inventory-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .btn-add {
+        background: var(--accent);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: 0.3s;
+        display: inline-block;
+    }
+
+    .btn-add:hover {
+        background: var(--accent-hover);
+    }
+
+    .table-img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 6px;
+        background: var(--bg-surface);
+    }
+
+    .action-btn {
+        color: var(--text-muted);
+        text-decoration: none;
+        margin-right: 15px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: 0.3s;
+    }
+
+    .action-btn:hover { color: white; text-decoration: underline; }
+    .action-btn.delete:hover { color: #ff4c4c; }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<main class="inventory-content" style="flex: 1; padding: 30px; overflow-y: auto; background: var(--bg-dark);">
     
-    <link rel="stylesheet" href="{% static 'staff/staff.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        /* A tiny bit of extra styling just for the inventory header and images */
-        .inventory-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .btn-add {
-            background: var(--accent);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: 0.3s;
-            display: inline-block;
-        }
-
-        .btn-add:hover {
-            background: var(--accent-hover);
-        }
-
-        .table-img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 6px;
-            background: var(--bg-surface);
-        }
-
-        .action-btn {
-            color: var(--text-muted);
-            text-decoration: none;
-            margin-right: 15px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: 0.3s;
-        }
-
-        .action-btn:hover { color: white; text-decoration: underline; }
-        .action-btn.delete:hover { color: #ff4c4c; }
-    </style>
-</head>
-<body>
-
-    <div class="pos-container">
+    <div class="inventory-header">
+        <div>
+            <h2 style="color: white; font-weight: 500;">Inventory Management</h2>
+            <p style="color: var(--text-muted); font-size: 14px;">Manage your products, pricing, and stock levels.</p>
+        </div>
         
-        <aside class="pos-sidebar">
-            <div class="pos-logo">URBAN<span>.</span></div>
-            
-            <a href="{% url 'admin_dashboard' %}" class="nav-item">POS</a>
-            <a href="#" class="nav-item">Orders</a>
-            <a href="{% url 'customer_list' %}" class="nav-item">Customers</a>
-            
-            <a href="{% url 'products:inventory_list' %}" class="nav-item active">Inventory</a>
-            
-            <div class="spacer"></div>
-            
-            <a href="#" class="nav-item">Settings</a>
-            <a href="{% url 'customer_logout' %}" class="nav-item" style="color: #ff4c4c;">Logout</a>
-        </aside>
-
-        <main class="inventory-content">
-            
-            <div class="inventory-header">
-                <div>
-                    <h2 style="color: white; font-weight: 500;">Inventory Management</h2>
-                    <p style="color: var(--text-muted); font-size: 14px;">Manage your products, pricing, and stock levels.</p>
-                </div>
-                
-                <a href="{% url 'products:product_create' %}" class="btn-add">
-                    Add Product
-                </a>
-            </div>
-
-            {% if messages %}
-                {% for message in messages %}
-                    <div style="background: rgba(46, 204, 113, 0.1); color: #2ecc71; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(46, 204, 113, 0.3);">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            <table class="inventory-table">
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Product Name</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for product in products %}
-                        <tr>
-                            <td>
-                                {% if product.product_image %}
-                                    <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="table-img">
-                                {% else %}
-                                    <div class="table-img" style="display: flex; align-items: center; justify-content: center; font-size: 10px; color: #666;">No Img</div>
-                                {% endif %}
-                            </td>
-                            <td style="font-weight: 500;">{{ product.name }}</td>
-                            <td><span style="background: var(--bg-surface); padding: 4px 10px; border-radius: 20px; font-size: 12px;">{{ product.category.name }}</span></td>
-                            <td style="color: var(--accent); font-weight: 600;">₱{{ product.price }}</td>
-                            <td>
-                                {% if product.stock_quantity <= 5 %}
-                                    <span style="color: #ff4c4c; font-weight: 600;">{{ product.stock_quantity }} (Low)</span>
-                                {% else %}
-                                    {{ product.stock_quantity }}
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a href="#" class="action-btn" title="Edit">Edit</a>
-                                <a href="#" class="action-btn delete" title="Delete">Delete</a>
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                No products found. Click "Add Product" to get started!
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-        </main>
-
+        <a href="{% url 'products:product_create' %}" class="btn-add">
+            Add Product
+        </a>
     </div>
 
-</body>
-</html>
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background: rgba(46, 204, 113, 0.1); color: #2ecc71; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(46, 204, 113, 0.3);">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <table class="inventory-table" style="width: 100%; border-collapse: collapse; background: var(--bg-panel); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color);">
+        <thead>
+            <tr style="background: var(--bg-surface); color: var(--text-muted); text-transform: uppercase; font-size: 13px;">
+                <th style="padding: 15px; text-align: left;">Image</th>
+                <th style="padding: 15px; text-align: left;">Product Name</th>
+                <th style="padding: 15px; text-align: left;">Category</th>
+                <th style="padding: 15px; text-align: left;">Price</th>
+                <th style="padding: 15px; text-align: left;">Stock</th>
+                <th style="padding: 15px; text-align: left;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 15px;">
+                        {% if product.product_image %}
+                            <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="table-img">
+                        {% else %}
+                            <div class="table-img" style="display: flex; align-items: center; justify-content: center; font-size: 10px; color: #666;">No Img</div>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 15px; font-weight: 500;">{{ product.name }}</td>
+                    <td style="padding: 15px;"><span style="background: var(--bg-surface); padding: 4px 10px; border-radius: 20px; font-size: 12px;">{{ product.category.name }}</span></td>
+                    <td style="padding: 15px; color: var(--accent); font-weight: 600;">₱{{ product.price }}</td>
+                    <td style="padding: 15px;">
+                        {% if product.stock_quantity <= 5 %}
+                            <span style="color: #ff4c4c; font-weight: 600;">{{ product.stock_quantity }} (Low)</span>
+                        {% else %}
+                            {{ product.stock_quantity }}
+                        {% endif %}
+                    </td>
+                    <td style="padding: 15px;">
+                        <a href="{% url 'products:edit_product' product.pk %}" class="action-btn" title="Edit">Edit</a>
+                        <a href="#" class="action-btn delete" title="Delete">Delete</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        No products found. Click "Add Product" to get started!
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</main>
+{% endblock %}

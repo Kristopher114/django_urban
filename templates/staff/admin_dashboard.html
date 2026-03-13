@@ -7,9 +7,9 @@
     <title>URBAN POS - Staff Dashboard</title>
     
     <link rel="stylesheet" href="{% static 'staff/staff.css' %}">
-    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
 
@@ -18,17 +18,21 @@
         <aside class="pos-sidebar">
             <div class="pos-logo">URBAN<span>.</span></div>
             
-            <a href="#" class="nav-item active"><i class="fa-solid fa-cash-register"></i> POS</a>
-            <a href="#" class="nav-item"><i class="fa-solid fa-receipt"></i> Orders</a>
-            <a href="{% url 'customer_list' %}" class="nav-item"><i class="fa-solid fa-users"></i> Customers</a>
-            <a href="{% url 'products:inventory_list' %}" class="nav-item"><i class="fa-solid fa-box"></i> Inventory</a>
+            <a href="{% url 'admin_dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">POS</a>
+            
+            <a href="#" class="nav-item">Orders</a>
+            
+            <a href="{% url 'customer_list' %}" class="nav-item {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">Customers</a>
+            
+            <a href="{% url 'products:inventory_list' %}" class="nav-item {% if request.resolver_match.url_name == 'inventory_list' %}active{% endif %}">Inventory</a>
             
             <div class="spacer"></div>
             
-            <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
-            <a href="{% url 'customer_logout' %}" class="nav-item" style="color: #ff4c4c;"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+            <a href="#" class="nav-item">Settings</a>
+            <a href="{% url 'customer_logout' %}" class="nav-item" style="color: #ff4c4c;">Logout</a>
         </aside>
 
+        {% block content %}
         <main class="pos-menu">
             <div class="menu-header">
                 <h2 style="color: white; font-weight: 500;">New Order</h2>
@@ -44,7 +48,6 @@
             </div>
 
             <div class="product-grid">
-                
                 {% for product in products %}
                     <div class="product-card" data-category="{{ product.category.id }}">
                         
@@ -60,12 +63,10 @@
                 {% empty %}
                     <p style="color: var(--text-muted); grid-column: 1 / -1;">No products found in inventory.</p>
                 {% endfor %}
-                
             </div>
         </main>
-
+        
         <aside class="pos-ticket">
-            
             <div class="ticket-header">
                 <h3 style="color: white; margin-bottom: 5px;">Current Ticket</h3>
                 <p style="color: var(--text-muted); font-size: 13px;">Order #10045 • Walk-in</p>
@@ -113,41 +114,29 @@
                 
                 <button class="btn-checkout">Pay / Checkout</button>
             </div>
-
         </aside>
+        {% endblock %}
 
     </div>
 
-</body>
-</html>
-
-<script>
+    {% block extra_js %}
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Grab all the pills and product cards from the screen
             const categoryPills = document.querySelectorAll('.pill');
             const productCards = document.querySelectorAll('.product-card');
 
-            // Add a click listener to every single pill
             categoryPills.forEach(pill => {
                 pill.addEventListener('click', function() {
-                    
-                    // 1. Remove the 'active' orange color from all pills...
                     categoryPills.forEach(p => p.classList.remove('active'));
-                    // ...and add it only to the one we just clicked!
                     this.classList.add('active');
 
-                    // 2. Find out which category ID we just clicked
                     const selectedCategory = this.getAttribute('data-category');
 
-                    // 3. Loop through every product on the screen
                     productCards.forEach(card => {
                         const productCategory = card.getAttribute('data-category');
-
-                        // If we clicked 'All Items' OR if the IDs match, show the card
                         if (selectedCategory === 'all' || selectedCategory === productCategory) {
                             card.style.display = 'block';
                         } else {
-                            // Otherwise, hide the card instantly!
                             card.style.display = 'none';
                         }
                     });
@@ -155,3 +144,6 @@
             });
         });
     </script>
+    {% endblock %}
+</body>
+</html>
