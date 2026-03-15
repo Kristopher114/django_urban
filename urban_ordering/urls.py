@@ -24,6 +24,7 @@ urlpatterns = [
     path('', include('dashboards.urls')),         # Keeps dashboard/home at the root "127.0.0.1:8000/"
     path('accounts/', include('accounts.urls')),  # Moves accounts to "127.0.0.1:8000/accounts/..."
     path('menu/', include('products.urls')),      # Moves products to "127.0.0.1:8000/menu/..."
+    path('orders/', include('orders.urls')),      # Moves orders to "127.0.0.1:8000/orders/..."
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,74 @@
+{% extends 'customers/dashboard.html' %} 
+{% load static %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 0 auto; text-align: center;">
+    <h2 style="margin-bottom: 20px;">Complete Your Payment</h2>
+    <p style="color: var(--text-muted); margin-bottom: 30px;">Order #{{ order.id }} &bull; Total: <strong style="color: white;">₱{{ order.total_amount }}</strong></p>
+
+    <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px;">
+        
+        <div id="paypal-button-container"></div>
+
+    </div>
+</div>
+
+<script src="https://www.paypal.com/sdk/js?client-id=test&currency=PHP"></script>
+
+<script>
+    // Grab the CSRF token directly from Django cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    paypal.Buttons({
+        // Sets up the transaction when a payment button is clicked
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: '{{ order.total_amount }}' // Injects your exact order total
+                    }
+                }]
+            });
+        },
+        // Finalize the transaction after payer approval
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(orderData) {
+                // Successful capture! Now we send the info to our Django backend
+                var transaction_id = orderData.purchase_units[0].payments.captures[0].id;
+                
+                fetch("{% url 'orders:payment_complete' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body: JSON.stringify({
+                        'orderID': '{{ order.id }}',
+                        'transactionID': transaction_id
+                    })
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                    alert('Transaction completed by ' + orderData.payer.name.given_name);
+                    // Redirect back to the menu or an order history page
+                    window.location.href = "{% url 'products:menu_list' %}"; 
+                });
+            });
+        }
+    }).render('#paypal-button-container');
+</script>
+{% endblock %}

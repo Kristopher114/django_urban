@@ -9,7 +9,34 @@
     <link rel="stylesheet" href="{% static 'staff/staff.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    {% block extra_css %}{% endblock %}
+    {% block extra_css %}
+    <style>
+        /* Styling for our new money received input */
+        .tendered-input {
+            width: 90px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 6px;
+            border-radius: 6px;
+            text-align: right;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+        .tendered-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        /* Highlight the change row */
+        .change-row {
+            color: #2ecc71; /* Bright green */
+            font-weight: 600;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-color);
+        }
+    </style>
+    {% endblock %}
 </head>
 <body>
 
@@ -17,17 +44,11 @@
         
         <aside class="pos-sidebar">
             <div class="pos-logo">URBAN<span>.</span></div>
-            
             <a href="{% url 'admin_dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">POS</a>
-            
             <a href="#" class="nav-item">Orders</a>
-            
             <a href="{% url 'customer_list' %}" class="nav-item {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">Customers</a>
-            
             <a href="{% url 'products:inventory_list' %}" class="nav-item {% if request.resolver_match.url_name == 'inventory_list' %}active{% endif %}">Inventory</a>
-            
             <div class="spacer"></div>
-            
             <a href="#" class="nav-item">Settings</a>
             <a href="{% url 'customer_logout' %}" class="nav-item" style="color: #ff4c4c;">Logout</a>
         </aside>
@@ -36,12 +57,11 @@
         <main class="pos-menu">
             <div class="menu-header">
                 <h2 style="color: white; font-weight: 500;">New Order</h2>
-                <input type="text" placeholder="Search menu...">
+                <input type="text" id="search-input" placeholder="Search menu..." style="padding: 8px 15px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-panel); color: white; outline: none;">
             </div>
 
             <div class="category-pills">
                 <div class="pill active" data-category="all">All Items</div>
-                
                 {% for category in categories %}
                     <div class="pill" data-category="{{ category.id }}">{{ category.name }}</div>
                 {% endfor %}
@@ -49,14 +69,12 @@
 
             <div class="product-grid">
                 {% for product in products %}
-                    <div class="product-card" data-category="{{ product.category.id }}">
-                        
+                    <div class="product-card" data-category="{{ product.category.id }}" onclick="addToCart('{{ product.id }}', '{{ product.name|escapejs }}', {{ product.price }})">
                         {% if product.product_image %}
                             <img src="{{ product.product_image.url }}" class="product-img" alt="{{ product.name }}">
                         {% else %}
                             <div class="product-img" style="display: flex; align-items: center; justify-content: center; font-size: 12px; color: #666;">No Img</div>
                         {% endif %}
-                        
                         <h4>{{ product.name }}</h4>
                         <p>₱{{ product.price }}</p>
                     </div>
@@ -69,50 +87,37 @@
         <aside class="pos-ticket">
             <div class="ticket-header">
                 <h3 style="color: white; margin-bottom: 5px;">Current Ticket</h3>
-                <p style="color: var(--text-muted); font-size: 13px;">Order #10045 • Walk-in</p>
+                <p style="color: var(--text-muted); font-size: 13px;">Walk-in Order</p>
             </div>
 
-            <div class="ticket-items">
-                <div class="cart-item">
-                    <div class="cart-info">
-                        <h5>Caffe Latte</h5>
-                        <p>₱150.00</p>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn"><i class="fa-solid fa-minus"></i></button>
-                        <span style="color: white; font-weight: 600;">2</span>
-                        <button class="qty-btn"><i class="fa-solid fa-plus"></i></button>
-                    </div>
-                </div>
-
-                <div class="cart-item">
-                    <div class="cart-info">
-                        <h5>Butter Croissant</h5>
-                        <p>₱120.00</p>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn"><i class="fa-solid fa-minus"></i></button>
-                        <span style="color: white; font-weight: 600;">1</span>
-                        <button class="qty-btn"><i class="fa-solid fa-plus"></i></button>
-                    </div>
-                </div>
+            <div class="ticket-items" id="ticket-items">
+                <p style="text-align: center; color: var(--text-muted); margin-top: 30px; font-size: 14px;">Tap items to add to ticket</p>
             </div>
 
             <div class="ticket-summary">
                 <div class="summary-row">
                     <span>Subtotal</span>
-                    <span>₱420.00</span>
+                    <span id="cart-subtotal">₱0.00</span>
                 </div>
                 <div class="summary-row">
                     <span>Tax (12%)</span>
-                    <span>₱50.40</span>
+                    <span id="cart-tax">₱0.00</span>
                 </div>
                 <div class="summary-row total">
                     <span>Total</span>
-                    <span>₱470.40</span>
+                    <span id="cart-total">₱0.00</span>
+                </div>
+
+                <div class="summary-row" style="margin-top: 15px;">
+                    <span>Tendered (₱)</span>
+                    <input type="number" id="amount-tendered" class="tendered-input" placeholder="0.00" oninput="calculateChange()">
+                </div>
+                <div class="summary-row change-row">
+                    <span>Change</span>
+                    <span id="cart-change">₱0.00</span>
                 </div>
                 
-                <button class="btn-checkout">Pay / Checkout</button>
+                <button class="btn-checkout" onclick="submitOrder()">Pay / Print Receipt</button>
             </div>
         </aside>
         {% endblock %}
@@ -121,28 +126,253 @@
 
     {% block extra_js %}
     <script>
+// --- 1. CATEGORY & SEARCH FILTERING LOGIC ---
         document.addEventListener('DOMContentLoaded', function() {
             const categoryPills = document.querySelectorAll('.pill');
             const productCards = document.querySelectorAll('.product-card');
+            const searchInput = document.getElementById('search-input');
+            
+            // We need to remember which category is currently clicked
+            let activeCategory = 'all';
 
+            // This master function checks BOTH the category and the search text
+            function filterMenu() {
+                const searchText = searchInput.value.toLowerCase();
+
+                productCards.forEach(card => {
+                    // Grab the category ID and the product's name
+                    const productCategory = card.getAttribute('data-category');
+                    const productName = card.querySelector('h4').innerText.toLowerCase();
+
+                    // Check if it matches the pill AND matches the search box
+                    const matchesCategory = (activeCategory === 'all' || activeCategory === productCategory);
+                    const matchesSearch = productName.includes(searchText);
+
+                    // If it matches both rules, show it. Otherwise, hide it instantly!
+                    if (matchesCategory && matchesSearch) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            // Listen for clicks on the Category Pills
             categoryPills.forEach(pill => {
                 pill.addEventListener('click', function() {
                     categoryPills.forEach(p => p.classList.remove('active'));
                     this.classList.add('active');
-
-                    const selectedCategory = this.getAttribute('data-category');
-
-                    productCards.forEach(card => {
-                        const productCategory = card.getAttribute('data-category');
-                        if (selectedCategory === 'all' || selectedCategory === productCategory) {
-                            card.style.display = 'block';
-                        } else {
-                            card.style.display = 'none';
-                        }
-                    });
+                    
+                    activeCategory = this.getAttribute('data-category');
+                    filterMenu(); // Re-filter the items
                 });
             });
+
+            // Listen for typing in the Search Bar
+            searchInput.addEventListener('input', function() {
+                filterMenu(); // Re-filter every single time a letter is typed!
+            });
         });
+
+        // --- 2. DYNAMIC CART LOGIC ---
+        let cart = {}; 
+        let currentTotal = 0; // Keep track of the final price globally
+
+        function addToCart(id, name, price) {
+            if (cart[id]) {
+                cart[id].qty += 1;
+            } else {
+                cart[id] = { name: name, price: parseFloat(price), qty: 1 };
+            }
+            renderCart();
+        }
+
+        function updateQty(id, change) {
+            if (cart[id]) {
+                cart[id].qty += change;
+                if (cart[id].qty <= 0) {
+                    delete cart[id];
+                }
+                renderCart();
+            }
+        }
+
+        function renderCart() {
+            const ticketItems = document.getElementById('ticket-items');
+            ticketItems.innerHTML = ''; 
+            let subtotal = 0;
+
+            const itemKeys = Object.keys(cart);
+
+            if (itemKeys.length === 0) {
+                ticketItems.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 30px; font-size: 14px;">Tap items to add to ticket</p>';
+            } else {
+                itemKeys.forEach(id => {
+                    const item = cart[id];
+                    const itemTotal = item.price * item.qty;
+                    subtotal += itemTotal;
+
+                    ticketItems.innerHTML += `
+                        <div class="cart-item">
+                            <div class="cart-info">
+                                <h5>${item.name}</h5>
+                                <p>₱${itemTotal.toFixed(2)}</p>
+                            </div>
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="updateQty('${id}', -1)" style="font-size: 20px; font-weight: bold;">-</button>
+                                <span style="color: white; font-weight: 600;">${item.qty}</span>
+                                <button class="qty-btn" onclick="updateQty('${id}', 1)" style="font-size: 20px; font-weight: bold;">+</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            const tax = subtotal * 0.12;
+            currentTotal = subtotal + tax;
+
+            document.getElementById('cart-subtotal').innerText = `₱${subtotal.toFixed(2)}`;
+            document.getElementById('cart-tax').innerText = `₱${tax.toFixed(2)}`;
+            document.getElementById('cart-total').innerText = `₱${currentTotal.toFixed(2)}`;
+            
+            // Re-calculate change whenever the cart updates
+            calculateChange();
+        }
+
+        // --- NEW: CALCULATE CHANGE ---
+        function calculateChange() {
+            const tenderedInput = document.getElementById('amount-tendered').value;
+            const tendered = parseFloat(tenderedInput) || 0;
+            
+            const change = tendered - currentTotal;
+            const changeDisplay = document.getElementById('cart-change');
+
+            if (tendered > 0 && change >= 0 && currentTotal > 0) {
+                changeDisplay.innerText = `₱${change.toFixed(2)}`;
+                changeDisplay.style.color = '#2ecc71'; // Green for good change
+            } else if (tendered > 0 && change < 0) {
+                changeDisplay.innerText = `Short ₱${Math.abs(change).toFixed(2)}`;
+                changeDisplay.style.color = '#ff4c4c'; // Red for insufficient funds
+            } else {
+                changeDisplay.innerText = '₱0.00';
+                changeDisplay.style.color = '#2ecc71';
+            }
+        }
+
+        // --- 3. CHECKOUT & RECEIPT LOGIC ---
+        function submitOrder() {
+            if (Object.keys(cart).length === 0) {
+                alert("Please add items to the ticket before checking out.");
+                return;
+            }
+
+            const tendered = parseFloat(document.getElementById('amount-tendered').value) || 0;
+            if (tendered < currentTotal) {
+                alert("Insufficient amount tendered. Please collect the full amount.");
+                return;
+            }
+
+            const checkoutBtn = document.querySelector('.btn-checkout');
+            checkoutBtn.innerText = "Processing...";
+            checkoutBtn.disabled = true;
+
+            // Save a snapshot of the cart to print BEFORE we empty it!
+            const cartSnapshot = JSON.parse(JSON.stringify(cart));
+            const totalSnapshot = currentTotal;
+            const tenderedSnapshot = tendered;
+            const changeSnapshot = tendered - currentTotal;
+
+            fetch("{% url 'orders:process_checkout' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}' 
+                },
+                body: JSON.stringify({ cart: cart })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Trigger the printable receipt
+                    printReceipt(data.order_id || "Walk-in", cartSnapshot, totalSnapshot, tenderedSnapshot, changeSnapshot);
+                    
+                    // Clear the POS for the next customer
+                    cart = {}; 
+                    document.getElementById('amount-tendered').value = '';
+                    renderCart(); 
+                } else {
+                    alert("Checkout Failed: " + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("A network error occurred. Please try again.");
+            })
+            .finally(() => {
+                checkoutBtn.innerText = "Pay / Print Receipt";
+                checkoutBtn.disabled = false;
+            });
+        }
+
+        // --- NEW: RECEIPT GENERATOR ---
+        function printReceipt(orderId, items, total, tendered, change) {
+            // Open a new blank window
+            const printWindow = window.open('', '_blank', 'width=400,height=600');
+            
+            // Build the HTML for a classic thermal printer receipt
+            let receiptHTML = `
+                <html>
+                <head>
+                    <title>Receipt</title>
+                    <style>
+                        body { font-family: 'Courier New', Courier, monospace; width: 300px; margin: 0 auto; padding: 20px; font-size: 14px; }
+                        h2 { text-align: center; margin-bottom: 5px; }
+                        p { text-align: center; margin-top: 0; font-size: 12px; }
+                        .divider { border-top: 1px dashed #000; margin: 15px 0; }
+                        .item-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+                        .totals-row { display: flex; justify-content: space-between; font-weight: bold; margin-top: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <h2>URBAN POS.</h2>
+                    <p>123 Coffee Street, Iligan City<br>Date: ${new Date().toLocaleString()}<br>Order ID: #${orderId}</p>
+                    <div class="divider"></div>
+            `;
+
+            // Loop through the items and add them to the receipt
+            for (let id in items) {
+                let item = items[id];
+                let itemTotal = item.qty * item.price;
+                receiptHTML += `
+                    <div class="item-row">
+                        <span>${item.qty}x ${item.name}</span>
+                        <span>₱${itemTotal.toFixed(2)}</span>
+                    </div>
+                `;
+            }
+
+            receiptHTML += `
+                    <div class="divider"></div>
+                    <div class="totals-row"><span>Total Due:</span><span>₱${total.toFixed(2)}</span></div>
+                    <div class="item-row"><span>Cash Tendered:</span><span>₱${tendered.toFixed(2)}</span></div>
+                    <div class="totals-row" style="font-size: 16px;"><span>Change:</span><span>₱${change.toFixed(2)}</span></div>
+                    <div class="divider"></div>
+                    <p>Thank you for your visit!</p>
+                </body>
+                </html>
+            `;
+
+            // Write the HTML to the new window and trigger the print dialog
+            printWindow.document.write(receiptHTML);
+            printWindow.document.close();
+            printWindow.focus();
+            
+            // Give the browser 250ms to render the HTML before popping the print dialog
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 250);
+        }
     </script>
     {% endblock %}
 </body>

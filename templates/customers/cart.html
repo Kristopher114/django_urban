@@ -1,0 +1,79 @@
+{% extends 'customers/dashboard.html' %} 
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2 style="margin-bottom: 30px;">My Cart</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background: rgba(46, 204, 113, 0.1); color: #2ecc71; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(46, 204, 113, 0.3);">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if cart_items %}
+        <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+            
+            <div style="flex: 2; min-width: 300px;">
+                <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+                    
+                    {% for item in cart_items %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color);">
+                            <div>
+                                <h4 style="margin: 0; font-size: 16px; color: white;">{{ item.name }}</h4>
+                                <p style="margin: 5px 0 0 0; color: var(--text-muted); font-size: 14px;">₱{{ item.price }} x {{ item.quantity }}</p>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <p style="margin: 0; color: var(--accent); font-weight: 600; font-size: 16px;">₱{{ item.total|floatformat:2 }}</p>
+                                
+                                <form method="POST" action="{% url 'orders:remove_from_cart' item.product_id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" style="background: none; border: none; color: #ff4c4c; font-size: 22px; cursor: pointer; padding: 0; line-height: 1; transition: 0.2s;" title="Remove Item" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                                        &times;
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                </div>
+            </div>
+
+            <div style="flex: 1; min-width: 250px;">
+                <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px; position: sticky; top: 20px;">
+                    <h3 style="color: white; margin-bottom: 20px; font-weight: 500;">Order Summary</h3>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--text-muted);">
+                        <span>Subtotal</span>
+                        <span>₱{{ subtotal|floatformat:2 }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--text-muted);">
+                        <span>Tax (12%)</span>
+                        <span>₱{{ tax|floatformat:2 }}</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color); color: white; font-weight: 600; font-size: 18px;">
+                        <span>Total</span>
+                        <span>₱{{ total|floatformat:2 }}</span>
+                    </div>
+
+                    <a href="{% url 'orders:checkout' %}" class="btn" style="display: block; text-align: center; width: 100%; padding: 15px; border: none; cursor: pointer; font-size: 16px; font-weight: 600; margin-top: 30px; box-sizing: border-box; text-decoration: none;">
+                        Proceed to Checkout
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    {% else %}  
+        <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 50px; text-align: center;">
+            <h3 style="color: white; margin-bottom: 15px;">Your cart is empty</h3>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">Looks like you haven't added any delicious items yet!</p>
+            <a href="{% url 'products:menu_list' %}" class="btn" style="display: inline-block; text-decoration: none;">Browse Menu</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

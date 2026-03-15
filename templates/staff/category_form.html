@@ -1,0 +1,161 @@
+{% extends 'staff/admin_dashboard.html' %} 
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background: var(--bg-panel);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 40px;
+        max-width: 700px;
+        margin: 0 auto; 
+    }
+
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 20px;
+    }
+
+    .btn-back {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+    .btn-back:hover { color: white; text-decoration: underline; }
+
+    label {
+        display: block;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-save {
+        width: 100%;
+        background: var(--accent);
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 20px;
+    }
+    .btn-save:hover { background: var(--accent-hover); }
+
+    .field-error { color: #ff4c4c; font-size: 12px; margin-top: -10px; margin-bottom: 15px; display: block; }
+    .field-error ul { list-style: none; padding: 0; }
+
+    /* --- NEW: Category Pills Styles --- */
+    .existing-categories {
+        margin-top: 40px;
+        padding-top: 25px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .pill-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .cat-pill {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-delete-cat {
+        background: none;
+        border: none;
+        color: #ff4c4c;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        margin-left: 5px;
+        transition: 0.3s;
+    }
+    .btn-delete-cat:hover { color: #ff1a1a; transform: scale(1.2); }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="inventory-content" style="flex: 1; padding: 30px; overflow-y: auto; background: var(--bg-dark);">
+    
+    <div class="form-container">
+        <div class="form-header">
+            <h2 style="color: white; font-weight: 500;">{{ title }}</h2>
+            <a href="{% url 'products:inventory_list' %}" class="btn-back">← Back to Inventory</a>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div style="margin-bottom: 20px;">
+                <label>Category Name</label>
+                {{ form.name }}
+                <span class="field-error">{{ form.name.errors }}</span>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label>Description</label>
+                {{ form.description }}
+                <span class="field-error">{{ form.description.errors }}</span>
+            </div>
+
+            <div>
+                <label>Category Image</label>
+                <div style="background: var(--bg-surface); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px;">
+                    {{ form.category_image }}
+                </div>
+                <span class="field-error">{{ form.category_image.errors }}</span>
+            </div>
+
+            <button type="submit" class="btn-save">Save Category</button>
+        </form>
+
+        <div class="existing-categories">
+            <h3 style="color: white; font-size: 16px; font-weight: 500;">Manage Existing Categories</h3>
+            <div class="pill-container">
+                
+                {% for category in categories %}
+                    <div class="cat-pill">
+                        {{ category.name }}
+                        
+                        <form method="POST" action="{% url 'products:delete_category' category.pk %}" style="display: inline;" onsubmit="return confirm('Delete {{ category.name|escapejs }}? This will also delete ALL products inside this category!');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-delete-cat" title="Delete Category">×</button>
+                        </form>
+                    </div>
+                {% empty %}
+                    <p style="color: var(--text-muted); font-size: 13px;">No categories created yet.</p>
+                {% endfor %}
+                
+            </div>
+        </div>
+
+    </div>
+</main>
+{% endblock %}
