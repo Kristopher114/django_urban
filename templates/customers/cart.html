@@ -55,14 +55,21 @@
                         <span>₱{{ tax|floatformat:2 }}</span>
                     </div>
                     
-                    <div style="display: flex; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color); color: white; font-weight: 600; font-size: 18px;">
+                        <div style="display: flex; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color); color: white; font-weight: 600; font-size: 18px;">
                         <span>Total</span>
                         <span>₱{{ total|floatformat:2 }}</span>
                     </div>
 
-                    <a href="{% url 'orders:checkout' %}" class="btn" style="display: block; text-align: center; width: 100%; padding: 15px; border: none; cursor: pointer; font-size: 16px; font-weight: 600; margin-top: 30px; box-sizing: border-box; text-decoration: none;">
-                        Proceed to Checkout
-                    </a>
+                    {% if is_open %}
+                        <a href="{% url 'orders:checkout' %}" class="btn" style="display: block; text-align: center; width: 100%; padding: 15px; border: none; cursor: pointer; font-size: 16px; font-weight: 600; margin-top: 30px; box-sizing: border-box; text-decoration: none;">
+                            Proceed to Checkout
+                        </a>
+                    {% else %}
+                        <div style="background: rgba(255, 76, 76, 0.1); border: 1px solid #ff4c4c; color: #ff4c4c; padding: 15px; border-radius: 8px; text-align: center; margin-top: 30px; font-weight: 500;">
+                            We are currently closed.<br>
+                            <span style="font-size: 13px;">Hours: 10:00 AM - 8:00 PM</span>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 

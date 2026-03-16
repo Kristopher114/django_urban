@@ -1,0 +1,60 @@
+{% extends 'customers/dashboard.html' %} 
+{% load static %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 0 auto;">
+    <h2 style="margin-bottom: 30px;">Order History</h2>
+
+    {% if orders %}
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            {% for order in orders %}
+                <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 25px;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px;">
+                        <div>
+                            <h3 style="color: white; margin: 0 0 5px 0; font-size: 18px;">Order #{{ order.id }}</h3>
+                            <p style="color: var(--text-muted); margin: 0; font-size: 13px;">{{ order.order_date|date:"F j, Y, g:i a" }}</p>
+                        </div>
+                        <div>
+                            <span style="background: rgba(255, 255, 255, 0.1); color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;">
+                                {{ order.status }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        {% for item in order.orderitem_set.all %}
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="color: #ddd; font-size: 15px;">{{ item.quantity }}x {{ item.product.name }}</span>
+                                <span style="color: var(--text-muted); font-size: 14px;">₱{{ item.subtotal }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-color); padding-top: 15px;">
+                        <div>
+                            <p style="margin: 0; color: var(--text-muted); font-size: 14px;">
+                                Payment: 
+                                <strong style="color: {% if order.payment.status == 'Completed' %}#2ecc71{% else %}#f1c40f{% endif %};">
+                                    {{ order.payment.payment_method }} ({{ order.payment.status }})
+                                </strong>
+                            </p>
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; color: var(--accent); font-size: 18px;">Total: ₱{{ order.total_amount }}</h4>
+                        </div>
+                    </div>
+
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 50px; text-align: center;">
+            <h3 style="color: white; margin-bottom: 15px;">No orders yet</h3>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">Looks like you haven't placed any orders. Time to grab a coffee!</p>
+            <a href="{% url 'products:menu_list' %}" class="btn" style="display: inline-block; text-decoration: none;">Browse Menu</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

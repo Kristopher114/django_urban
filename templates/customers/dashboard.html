@@ -16,7 +16,7 @@
         <div class="nav-links">
             <a href="{% url 'orders:view_cart' %}">My Cart</a>
             <a href="{% url 'products:menu_list' %}">Menu</a>
-            <a href="#">My Orders</a>
+            <a href="{% url 'orders:customer_orders' %}">My Orders</a>
             <a href="{% url 'customer_profile' %}">Profile</a>
             <a href="{% url 'customer_logout' %}">Logout</a>
             
@@ -26,7 +26,7 @@
     {% block content %}
     <section class="hero" style="background-image: url('{% static 'images/branch.jpg' %}');">
         <div class="hero-content">
-            <h1>Welcome Back</h1>
+            <h1>Welcome Back, {{ request.user.customer.first_name }}!</h1>
             <p class="tagline">Order your favorites quickly and easily</p>
         </div>
     </section>
@@ -59,21 +59,39 @@
         <div class="orders">
             <h2>Recent Orders</h2>
             
-            <div class="order-card">
-                <div>
-                    <strong>Order #1023</strong>
-                    <p>Latte + Croissant</p>
+            {% for order in recent_orders %}
+                <div class="order-card">
+                    <div>
+                        <strong>Order #{{ order.id }}</strong>
+                        <p style="color: var(--text-muted); font-size: 13px; margin-top: 5px;">
+                            {% for item in order.orderitem_set.all %}
+                                {{ item.product.name }}{% if not forloop.last %} + {% endif %}
+                            {% endfor %}
+                        </p>
+                    </div>
+                    
+                    <span class="status" 
+                        {% if order.status == 'Completed' %}
+                            style="color: #2ecc71; background: rgba(46, 204, 113, 0.1);"
+                        {% elif order.status == 'Pending' %}
+                            style="color: #f1c40f; background: rgba(241, 196, 15, 0.1);"
+                        {% elif order.status == 'Canceled' %}
+                            style="color: #ff4c4c; background: rgba(255, 76, 76, 0.1);"
+                        {% else %}
+                            /* Default color for Preparing / Ready / Out for Delivery */
+                            style="color: #3498db; background: rgba(52, 152, 219, 0.1);"
+                        {% endif %}
+                    >
+                        {{ order.status }}
+                    </span>
                 </div>
-                <span class="status">Preparing</span>
-            </div>
-
-            <div class="order-card">
-                <div>
-                    <strong>Order #1021</strong>
-                    <p>Caramel Macchiato</p>
-                </div>
-                <span class="status" style="color: #2ecc71; background: rgba(46, 204, 113, 0.1);">Completed</span>
-            </div>
+            {% empty %}
+                <p style="color: var(--text-muted); font-size: 14px; margin-top: 15px;">You haven't placed any orders yet.</p>
+            {% endfor %}
+            
+            {% if recent_orders %}
+                <a href="{% url 'orders:customer_orders' %}" style="display: block; text-align: center; margin-top: 15px; color: var(--accent); font-size: 14px; text-decoration: none;">View all orders &rarr;</a>
+            {% endif %}
         </div>
     </div>
     {% endblock %}

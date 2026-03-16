@@ -7,6 +7,19 @@ from django.contrib import messages
 # Import your models from both apps!
 from products.models import Product
 from orders.models import Order, OrderItem, Payment
+from django.utils import timezone
+import datetime
+
+def is_store_open():
+    """Returns True if current time is within operating hours (8am - 8pm)"""
+    # Get the current local time in Asia/Manila
+    current_time = timezone.localtime().time()
+    
+    # Set your open and close times (24-hour format)
+    opening_time = datetime.time(10, 0)   # 8:00 AM
+    closing_time = datetime.time(20, 0)  # 8:00 PM
+    
+    return opening_time <= current_time <= closing_time
 
 @login_required
 def add_to_cart(request, product_id):
@@ -72,8 +85,8 @@ def view_cart(request):
         'subtotal': subtotal,
         'tax': tax,
         'total': total,
+        'is_open': is_store_open(), # PASS THE OPEN STATUS TO THE HTML
     }
-    
     return render(request, 'customers/cart.html', context)
 
 @login_required
@@ -101,8 +114,13 @@ def remove_from_cart(request, product_id):
 
 @login_required(login_url='login') # Force users to log in before checking out!
 def checkout(request):
+    # 1. NEW: Check if the store is actually open!
+    if not is_store_open():
+        messages.error(request, "Sorry, we are currently closed! Operating hours are 8:00 AM to 8:00 PM.")
+        return redirect('orders:view_cart')
+
     cart = request.session.get('customer_cart', {})
-    
+
     # If they try to go to checkout with an empty cart, kick them back to the menu
     if not cart:
         messages.warning(request, "Your cart is empty! Please add some items first.")
@@ -198,6 +216,43 @@ def payment_complete(request):
     payment.save()
     
     return JsonResponse('Payment completed!', safe=False)
+
+@login_required(login_url='login')
+def customer_orders(request):
+    # Fetch all orders that belong exclusively to the logged-in user, newest first!
+    orders = Order.objects.filter(user=request.user).order_by('-order_date')
+    
+    return render(request, 'customers/order_list.html', {'orders': orders})
+
+
+#------ admin side---------------------------------------------
+@login_required(login_url='login')
+def staff_order_list(request):
+    """Fetches all orders for the staff dashboard, newest first."""
+    # You can also filter this to exclude 'Completed' if you only want active orders!
+    orders = Order.objects.all().order_by('-order_date')
+    return render(request, 'staff/order_list.html', {'orders': orders})
+
+@login_required(login_url='login')
+def update_order_status(request, order_id):
+    """Securely updates the status of an order when staff change it."""
+    if request.method == 'POST':
+        order = get_object_or_404(Order, id=order_id)
+        new_status = request.POST.get('status')
+        
+        # Update the order status
+        order.status = new_status
+        order.save()
+        
+        # If they mark the order as Completed, let's also mark the Payment as Completed (for COD)
+        if new_status == 'Completed' and order.payment.status == 'Pending':
+            order.payment.status = 'Completed'
+            order.payment.save()
+            
+        messages.success(request, f"Order #{order.id} is now marked as {new_status}.")
+        
+    return redirect('orders:staff_order_list')
+
 
 @login_required
 def process_checkout(request):

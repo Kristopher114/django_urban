@@ -1,0 +1,113 @@
+{% extends 'staff/admin_dashboard.html' %} 
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .status-select {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-surface);
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        outline: none;
+        cursor: pointer;
+    }
+    .status-select:focus { border-color: var(--accent); }
+    
+    .btn-update {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: 0.3s;
+    }
+    .btn-update:hover { background: var(--accent-hover); }
+</style>
+{% endblock %}
+
+{% block content %}
+<main style="flex: 1; padding: 30px; overflow-y: auto; background: var(--bg-dark);">
+    
+    <div style="margin-bottom: 30px;">
+        <h2 style="color: white; font-weight: 500;">Kitchen & Orders Dashboard</h2>
+        <p style="color: var(--text-muted); font-size: 14px;">Manage incoming POS and Online orders in real-time.</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background: rgba(46, 204, 113, 0.1); color: #2ecc71; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(46, 204, 113, 0.3);">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <table style="width: 100%; border-collapse: collapse; background: var(--bg-panel); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color);">
+        <thead>
+            <tr style="background: var(--bg-surface); color: var(--text-muted); text-transform: uppercase; font-size: 13px;">
+                <th style="padding: 15px; text-align: left;">Order #</th>
+                <th style="padding: 15px; text-align: left;">Customer</th>
+                <th style="padding: 15px; text-align: left; width: 30%;">Items</th>
+                <th style="padding: 15px; text-align: left;">Payment</th>
+                <th style="padding: 15px; text-align: left;">Update Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    
+                    <td style="padding: 15px;">
+                        <strong style="color: white; font-size: 16px;">#{{ order.id }}</strong>
+                        <div style="color: var(--text-muted); font-size: 12px; margin-top: 5px;">{{ order.order_date|date:"M j, g:i a" }}</div>
+                    </td>
+                    
+                    <td style="padding: 15px; color: white;">
+                        {{ order.user.username }}
+                    </td>
+                    
+                    <td style="padding: 15px;">
+                        <ul style="list-style: none; padding: 0; margin: 0; color: #ddd; font-size: 14px;">
+                            {% for item in order.orderitem_set.all %}
+                                <li style="margin-bottom: 4px;">{{ item.quantity }}x {{ item.product.name }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    
+                    <td style="padding: 15px;">
+                        <span style="display: block; color: white; font-weight: 500;">₱{{ order.total_amount }}</span>
+                        <span style="font-size: 12px; color: {% if order.payment.status == 'Completed' %}#2ecc71{% else %}#f1c40f{% endif %};">
+                            {{ order.payment.payment_method }} ({{ order.payment.status }})
+                        </span>
+                    </td>
+                    
+                    <td style="padding: 15px;">
+                        <form method="POST" action="{% url 'orders:update_order_status' order.id %}" style="display: flex; gap: 10px; align-items: center;">
+                            {% csrf_token %}
+                            <select name="status" class="status-select">
+                                <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                <option value="Preparing" {% if order.status == 'Preparing' %}selected{% endif %}>Preparing</option>
+                                <option value="Ready" {% if order.status == 'Ready' %}selected{% endif %}>Ready</option>
+                                <option value="Out for Delivery" {% if order.status == 'Out for Delivery' %}selected{% endif %}>Out for Delivery</option>
+                                <option value="Completed" {% if order.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                <option value="Canceled" {% if order.status == 'Canceled' %}selected{% endif %}>Canceled</option>
+                            </select>
+                            <button type="submit" class="btn-update">Save</button>
+                        </form>
+                    </td>
+                    
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        No orders have been placed yet.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</main>
+{% endblock %}

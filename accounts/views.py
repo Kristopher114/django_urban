@@ -5,15 +5,19 @@ from django.contrib import messages
 from .models import Customer
 from .forms import UserRegisterForm, CustomerForm
 from products.models import Category, Product
+from orders.models import Order # Make sure Order is imported!
 
-
-@login_required
+@login_required()
 def customer_dashboard(request):
     # Just grab all categories for the main page
     categories = Category.objects.all()
-    
+        # Grab the 3 most recent orders for this specific user
+    recent_orders = Order.objects.filter(user=request.user).order_by('-order_date')[:3]
+
     context = {
         'categories': categories,
+        'recent_orders': recent_orders,
+
     }
     return render(request, 'customers/dashboard.html', context)
 # --- VIEW 2: The Specific Menu List ---
