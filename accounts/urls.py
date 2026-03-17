@@ -14,7 +14,5 @@ urlpatterns = [
     # --- Staff / Admin URLs ---
     path('staff/login/', views.staff_login, name='staff_login'), # Changed to staff/login/ for clarity
     path('staff/dashboard/', views.admin_dashboard, name='admin_dashboard'), # Added this!
-    path('staff/customers/', views.customer_list, name='customer_list'),
-    path('staff/customers/<int:pk>/', views.customer_detail, name='customer_detail'),
-    path('staff/customers/<int:pk>/delete/', views.delete_customer, name='delete_customer'),
+    path('staff/manage/', views.manage_staff, name='manage_staff'),
 ]

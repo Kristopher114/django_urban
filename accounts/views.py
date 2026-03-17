@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.contrib.auth.models import User
 from .models import Customer
 from .forms import UserRegisterForm, CustomerForm
 from products.models import Category, Product
@@ -163,39 +164,41 @@ def admin_dashboard(request):
 # ... Keep your customer_list, customer_detail, and delete_customer views exactly as they are!
 
 @login_required
-def customer_list(request):
-    """List all customers — staff/admin only."""
-    if not request.user.is_staff:
-        messages.error(request, 'Access denied.')
-        return redirect('customer_profile')
-
-    customers = Customer.objects.select_related('user').all()
-    return render(request, 'customers/customer_list.html', {'customers': customers})
-
-
-@login_required
-def customer_detail(request, pk):
-    """View a specific customer — staff/admin only."""
-    if not request.user.is_staff:
-        messages.error(request, 'Access denied.')
-        return redirect('customer_profile')
-
-    customer = get_object_or_404(Customer, pk=pk)
-    return render(request, 'staff/customer_detail.html', {'customer': customer})
-
-
-@login_required
-def delete_customer(request, pk):
-    """Delete a customer account — staff/admin only."""
-    if not request.user.is_staff:
-        messages.error(request, 'Access denied.')
-        return redirect('customer_profile')
-
-    customer = get_object_or_404(Customer, pk=pk)
+def manage_staff(request):
+    """Allows Superusers to view and create staff accounts."""
+    
+    # SECURITY: Bounce them out if they aren't the big boss!
+    if not request.user.is_superuser:
+        messages.error(request, "Access Denied. Only the store owner can manage staff.")
+        return redirect('orders:staff_dashboard') # Adjust this redirect to your main staff page
 
     if request.method == 'POST':
-        customer.user.delete()   # cascades to Customer via OneToOneField
-        messages.success(request, 'Customer deleted successfully.')
-        return redirect('customer_list')
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        password = request.POST.get('password')
 
-    return render(request, 'customers/confirm_delete.html', {'customer': customer})
+        # Safety Check: Does the username already exist?
+        if User.objects.filter(username=username).exists():
+            messages.error(request, f"The username '{username}' is already taken.")
+        else:
+            # Create the user and safely encrypt the password!
+            new_staff = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+            # THIS IS THE MAGIC LINE: Give them POS and Kitchen access!
+            new_staff.is_staff = True 
+            new_staff.save()
+            
+            messages.success(request, f"Staff account for {first_name} created successfully!")
+            return redirect('manage_staff') # Refresh the page
+
+    # Get a list of all current staff and superusers to display in the table
+    staff_members = User.objects.filter(is_staff=True).order_by('-is_superuser', '-date_joined')
+
+    return render(request, 'staff/manage_staff.html', {'staff_members': staff_members})

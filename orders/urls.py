@@ -20,4 +20,5 @@ urlpatterns = [
     path('pos/checkout/', views.process_checkout, name='process_checkout'),
 
     path('staff/analytics/', views.sales_analytics, name='sales_analytics'),
+    path('staff/shift-summary/', views.shift_summary, name='shift_summary'),
 ]   

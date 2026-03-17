@@ -1,0 +1,98 @@
+{% extends 'staff/admin_dashboard.html' %} 
+{% load static %}
+
+{% block content %}
+<main style="flex: 1; padding: 30px; overflow-y: auto; background: var(--bg-dark);">
+    
+    <div style="margin-bottom: 30px;">
+        <h2 style="color: white; font-weight: 500;">Manage Staff</h2>
+        <p style="color: var(--text-muted); font-size: 14px;">Create and view employee accounts for the POS and Kitchen.</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding: 15px; border-radius: 8px; margin-bottom: 20px; 
+                 {% if message.tags == 'error' %}background: rgba(231, 76, 60, 0.1); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3);
+                 {% else %}background: rgba(46, 204, 113, 0.1); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3);{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+        
+        <div style="flex: 1; min-width: 300px; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px; align-self: flex-start;">
+            <h3 style="color: white; margin-bottom: 20px; font-weight: 500;">Add New Employee</h3>
+            
+            <form method="POST" action="{% url 'manage_staff' %}">
+                {% csrf_token %}
+                
+                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <label style="display: block; color: var(--text-muted); font-size: 13px; margin-bottom: 8px;">First Name</label>
+                        <input type="text" name="first_name" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: white; outline: none;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="display: block; color: var(--text-muted); font-size: 13px; margin-bottom: 8px;">Last Name</label>
+                        <input type="text" name="last_name" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: white; outline: none;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: var(--text-muted); font-size: 13px; margin-bottom: 8px;">Email Address</label>
+                    <input type="email" name="email" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: white; outline: none;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: var(--text-muted); font-size: 13px; margin-bottom: 8px;">Username (For Logging In)</label>
+                    <input type="text" name="username" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: white; outline: none;">
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: var(--text-muted); font-size: 13px; margin-bottom: 8px;">Temporary Password</label>
+                    <input type="password" name="password" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: white; outline: none;">
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%; padding: 15px; border: none; cursor: pointer; font-size: 16px; font-weight: 600; border-radius: 8px;">Create Account</button>
+            </form>
+        </div>
+
+        <div style="flex: 2; min-width: 400px; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; align-self: flex-start;">
+            <div style="padding: 20px; border-bottom: 1px solid var(--border-color);">
+                <h3 style="color: white; font-weight: 500;">Active Team Members</h3>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="background: var(--bg-surface); color: var(--text-muted); font-size: 13px; text-transform: uppercase;">
+                        <th style="padding: 15px 20px;">Name</th>
+                        <th style="padding: 15px 20px;">Username</th>
+                        <th style="padding: 15px 20px;">Role</th>
+                        <th style="padding: 15px 20px;">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for staff in staff_members %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 15px 20px; color: white; font-weight: 500;">{{ staff.first_name }} {{ staff.last_name }}</td>
+                        <td style="padding: 15px 20px; color: #ddd; font-size: 14px;">@{{ staff.username }}</td>
+                        <td style="padding: 15px 20px;">
+                            {% if staff.is_superuser %}
+                                <span style="background: rgba(46, 204, 113, 0.2); color: #2ecc71; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">Manager</span>
+                            {% else %}
+                                <span style="background: rgba(52, 152, 219, 0.2); color: #3498db; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">Staff</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px 20px; color: var(--text-muted); font-size: 14px;">{{ staff.date_joined|date:"M j, Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="padding: 30px; text-align: center; color: var(--text-muted);">No staff members found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</main>
+{% endblock %}

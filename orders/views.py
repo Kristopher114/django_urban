@@ -246,7 +246,7 @@ def update_order_status(request, order_id):
         order.save()
         
         # If they mark the order as Completed, let's also mark the Payment as Completed (for COD)
-        if new_status == 'Completed' and order.payment.status == 'Pending':
+        if new_status == 'Completed' and hasattr(order, 'payment'):
             order.payment.status = 'Completed'
             order.payment.save()
             
@@ -314,8 +314,9 @@ def process_checkout(request):
 @login_required(login_url='login')
 def sales_analytics(request):
     """Generates a 7-Day Sales Report."""
-    if not request.user.is_staff:
-        return redirect('products:menu_list')
+    if not request.user.is_superuser:
+        messages.error(request, "You do not have permission to view financial reports.")
+        return redirect('orders:staff_dashboard') # Send them back to the kitchen screen
 
     today = timezone.now().date()
     seven_days_ago = today - datetime.timedelta(days=6)
@@ -354,3 +355,33 @@ def sales_analytics(request):
         'sales': json.dumps(sales_list),
     }
     return render(request, 'staff/analytics.html', context)
+
+@login_required(login_url='login')
+def shift_summary(request):
+    """Generates an End-of-Shift report for the logged-in cashier."""
+    
+    # Security check: Must be staff to see this
+    if not request.user.is_staff:
+        return redirect('products:menu_list')
+
+    # Get today's date
+    today = timezone.now().date()
+
+    # Find only the completed orders processed by THIS specific staff member TODAY
+    my_orders_today = Order.objects.filter(
+        user=request.user, 
+        order_date__date=today,
+        status='Completed'
+    ).order_by('-order_date')
+
+    # Calculate their drawer totals
+    total_cash_handled = my_orders_today.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+    order_count = my_orders_today.count()
+
+    context = {
+        'total_cash_handled': total_cash_handled,
+        'order_count': order_count,
+        'my_orders': my_orders_today,
+        'today': today,
+    }
+    return render(request, 'staff/shift_summary.html', context)

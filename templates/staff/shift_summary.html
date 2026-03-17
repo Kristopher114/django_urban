@@ -1,0 +1,67 @@
+{% extends 'staff/admin_dashboard.html' %} 
+{% load static %}
+
+{% block content %}
+<main style="flex: 1; padding: 30px; overflow-y: auto; background: var(--bg-dark);">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h2 style="color: white; font-weight: 500;">My Shift Summary</h2>
+            <p style="color: var(--text-muted); font-size: 14px;">End of day report for {{ request.user.first_name|default:request.user.username }}</p>
+        </div>
+        <button onclick="window.print()" class="btn" style="width: auto; padding: 10px 20px; background: var(--bg-surface); border: 1px solid var(--border-color);">
+            🖨️ Print Drawer Drop
+        </button>
+    </div>
+
+    <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 40px; max-width: 600px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+        
+        <div style="text-align: center; border-bottom: 2px dashed var(--border-color); padding-bottom: 20px; margin-bottom: 20px;">
+            <h3 style="color: white; font-size: 24px; letter-spacing: 2px;">URBAN COFFEE</h3>
+            <p style="color: var(--text-muted); font-size: 14px; text-transform: uppercase;">End of Shift Report</p>
+            <p style="color: var(--text-muted); font-size: 13px; margin-top: 10px;">Date: {{ today|date:"F j, Y" }}</p>
+            <p style="color: var(--text-muted); font-size: 13px;">Cashier: {{ request.user.username }}</p>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+            <span style="color: #ddd; font-size: 16px;">Total Orders Processed:</span>
+            <span style="color: white; font-size: 16px; font-weight: 600;">{{ order_count }}</span>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 30px; background: rgba(255, 122, 0, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid var(--accent);">
+            <span style="color: var(--accent); font-size: 18px; font-weight: 600;">Expected Drawer Cash:</span>
+            <span style="color: white; font-size: 22px; font-weight: 700;">₱{{ total_cash_handled|floatformat:2 }}</span>
+        </div>
+
+        <h4 style="color: white; font-size: 14px; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Transaction Log</h4>
+        
+        <table style="width: 100%; text-align: left; font-size: 14px;">
+            <thead>
+                <tr style="color: var(--text-muted);">
+                    <th style="padding-bottom: 10px;">Time</th>
+                    <th style="padding-bottom: 10px;">Order #</th>
+                    <th style="padding-bottom: 10px; text-align: right;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in my_orders %}
+                <tr>
+                    <td style="padding: 8px 0; color: #ddd;">{{ order.order_date|date:"g:i A" }}</td>
+                    <td style="padding: 8px 0; color: #ddd;">#{{ order.id }}</td>
+                    <td style="padding: 8px 0; color: white; text-align: right; font-weight: 500;">₱{{ order.total_amount }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="padding: 20px 0; text-align: center; color: var(--text-muted);">No orders processed today.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px dashed var(--border-color);">
+            <p style="color: var(--text-muted); font-size: 12px;">Manager Signature: _______________________</p>
+        </div>
+
+    </div>
+</main>
+{% endblock %}
