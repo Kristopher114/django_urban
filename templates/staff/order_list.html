@@ -26,6 +26,39 @@
         transition: 0.3s;
     }
     .btn-update:hover { background: var(--accent-hover); }
+    /* The dark semi-transparent background */
+    .modal-overlay {
+        display: none; /* Hidden by default */
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(3px);
+    }
+    
+    /* The actual pop-up card */
+    .modal-card {
+        background: var(--bg-panel);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        padding: 30px;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* The close X button */
+    .close-btn {
+        position: absolute;
+        top: 20px; right: 20px;
+        background: none; border: none;
+        color: var(--text-muted);
+        font-size: 24px; cursor: pointer;
+    }
+    .close-btn:hover { color: white; }
 </style>
 {% endblock %}
 
@@ -60,12 +93,23 @@
                 <tr style="border-bottom: 1px solid var(--border-color);">
                     
                     <td style="padding: 15px;">
-                        <strong style="color: white; font-size: 16px;">#{{ order.id }}</strong>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <strong style="color: white; font-size: 16px;">#{{ order.id }}</strong>
+                            {% if order.user.is_staff %}
+                                <span style="background: rgba(155, 89, 182, 0.2); color: #9b59b6; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 800;">WALK-IN</span>
+                            {% else %}
+                                <span style="background: rgba(52, 152, 219, 0.2); color: #3498db; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 800;">ONLINE</span>
+                            {% endif %}
+                        </div>
                         <div style="color: var(--text-muted); font-size: 12px; margin-top: 5px;">{{ order.order_date|date:"M j, g:i a" }}</div>
+                        
+                        <button onclick="openModal('modal-{{ order.id }}')" style="margin-top: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: 0.2s;">
+                            View Details
+                        </button>
                     </td>
                     
                     <td style="padding: 15px; color: white;">
-                        {{ order.user.username }}
+                        {{ order.user.customer.first_name }} {{order.user.customer.last_name}}
                     </td>
                     
                     <td style="padding: 15px;">
@@ -99,6 +143,44 @@
                     </td>
                     
                 </tr>
+
+                <div id="modal-{{ order.id }}" class="modal-overlay">
+                        <div class="modal-card">
+                            <button class="close-btn" onclick="closeModal('modal-{{ order.id }}')">&times;</button>
+                            
+                            <h3 style="color: white; margin-bottom: 5px; font-size: 22px;">Order #{{ order.id }} Details</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">Placed by: {{ order.user.customer.first_name }} {{ order.user.customer.last_name }}</p>
+                            
+                            {% if not order.user.is_staff %}
+                                <div style="background: rgba(241, 196, 15, 0.15); border-left: 4px solid #f1c40f; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                                    <strong style="color: #f1c40f; display: block; font-size: 13px; text-transform: uppercase; margin-bottom: 5px;">Delivery Destination</strong>
+                                    <span style="color: white; font-size: 16px; font-weight: 500;">{{ order.delivery_address|default:order.user.customer.address }}</span>
+                                    <br>
+                                    <span style="color: #ddd; font-size: 14px;">📞 {{ order.phone|default:order.user.customer.phone }}</span>
+                                </div>
+                            {% else %}
+                                <div style="background: rgba(155, 89, 182, 0.15); border-left: 4px solid #9b59b6; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                                    <strong style="color: #9b59b6; display: block; font-size: 13px; text-transform: uppercase; margin-bottom: 5px;">Order Type</strong>
+                                    <span style="color: white; font-size: 16px; font-weight: 500;">Walk-in Customer (No Delivery)</span>
+                                </div>
+                            {% endif %}
+
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-bottom: 20px;">
+                                <strong style="color: white; font-size: 14px; display: block; margin-bottom: 10px;">Order Items:</strong>
+                                {% for item in order.orderitem_set.all %}
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="color: #ddd; font-size: 15px;">{{ item.quantity }}x {{ item.product.name }}</span>
+                                        <span style="color: var(--text-muted); font-size: 14px;">₱{{ item.subtotal }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                                <span style="color: var(--text-muted); font-size: 14px;">{{ order.payment.payment_method }} ({{ order.payment.status }})</span>
+                                <h4 style="margin: 0; color: var(--accent); font-size: 20px;">Total: ₱{{ order.total_amount }}</h4>
+                            </div>
+                        </div>
+                    </div>
             {% empty %}
                 <tr>
                     <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">
@@ -110,4 +192,21 @@
     </table>
 
 </main>
+
+<script>
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Optional Pro-touch: Close the modal if they click outside the card
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal-overlay')) {
+            event.target.style.display = "none";
+        }
+    }
+</script>
 {% endblock %}

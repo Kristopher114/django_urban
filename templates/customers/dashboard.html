@@ -9,17 +9,21 @@
 </head>
 <body>
 
-    <div class="navbar">
+    <div class="navbar" style="position: relative;">
         <div class="logo">
             <a href="{% url 'customer_dashboard' %}">URBAN</a>
         </div>
-        <div class="nav-links">
+        
+        <button class="hamburger-btn" onclick="toggleMobileMenu()">
+            &#9776;
+        </button>
+
+        <div class="nav-links" id="mobile-nav">
             <a href="{% url 'orders:view_cart' %}">My Cart</a>
             <a href="{% url 'products:menu_list' %}">Menu</a>
             <a href="{% url 'orders:customer_orders' %}">My Orders</a>
             <a href="{% url 'customer_profile' %}">Profile</a>
             <a href="{% url 'customer_logout' %}">Logout</a>
-            
         </div>
     </div>
 
@@ -98,8 +102,29 @@
 
     <footer>
         <p>© 2026 URBAN. All Rights Reserved.</p>
-        <p>123 Main St | (123) 456-7890</p>
+        <p>Andres Bonifacio National Highway San Miguel, Iligan City, Philippines, 9200</p>
     </footer>
 
+
+    <script>
+        function toggleMobileMenu() {
+            const nav = document.getElementById('mobile-nav');
+            // Toggles the 'show-menu' class on and off
+            nav.classList.toggle('show-menu');
+        }
+
+        // Optional pro-touch: Close the menu if they tap outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.hamburger-btn')) {
+                const dropdowns = document.getElementsByClassName("nav-links");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    let openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show-menu')) {
+                        openDropdown.classList.remove('show-menu');
+                    }
+                }
+            }
+        }
+    </script>
 </body>
 </html>

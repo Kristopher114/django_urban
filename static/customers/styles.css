@@ -252,3 +252,62 @@ footer p { margin-bottom: 5px; }
     color: var(--text-muted);
     font-size: 14px;
 }
+
+/*----Mobile View--------*/
+/* 1. Hide the hamburger button on desktop monitors */
+.hamburger-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 26px;
+    cursor: pointer;
+}
+
+/* 2. Mobile-only rules */
+@media (max-width: 768px) {
+    /* Shrink the invisible walls on mobile! */
+    .navbar {
+        padding: 15px 20px; 
+    }
+    /* Show the hamburger button */
+    .hamburger-btn {
+        display: block;
+        margin-left: 200px; /* Pushes it to the far right */
+    }
+
+    /* Hide the normal links and turn them into a dropdown menu */
+    .nav-links {
+        display: none; /* Hidden by default on mobile */
+        flex-direction: column;
+        position: absolute;
+        top: 60px; 
+        right: 20px; /* Changed to 20px so it doesn't touch the absolute edge of the screen */
+        
+        /* THE FIX: Changed from --bg-panel to --bg-card */
+        background: var(--bg-card); 
+        
+        border: 1px solid var(--border-color);
+        width: 200px;
+        border-radius: 8px;
+        padding: 10px 0;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8); /* Made the shadow a bit darker for depth */
+        z-index: 1000;
+    }
+
+    /* This class gets added by JavaScript when clicked */
+    .nav-links.show-menu {
+        display: flex;
+    }
+
+    /* Make the links look nice in the dropdown */
+    .nav-links a {
+        padding: 12px 20px;
+        display: block;
+        text-align: left;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .nav-links a:last-child {
+        border-bottom: none;
+    }
+}

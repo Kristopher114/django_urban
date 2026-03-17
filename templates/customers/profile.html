@@ -1,0 +1,47 @@
+{% extends 'customers/dashboard.html' %} 
+{% load static %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 0 auto; padding-top: 20px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h2 style="color: white; font-weight: 500;">My Profile</h2>
+            <p style="color: var(--text-muted); font-size: 14px;">Manage your account details.</p>
+        </div>
+        <a href="{% url 'edit_profile' %}" class="btn" style="text-decoration: none; padding: 8px 16px; border-radius: 6px;">Edit Profile</a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background: rgba(46, 204, 113, 0.1); color: #2ecc71; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(46, 204, 113, 0.3);">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px;">
+        
+        <div style="margin-bottom: 20px;">
+            <label style="color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Full Name</label>
+            <p style="color: white; font-size: 18px; margin: 5px 0 0 0;">{{ user.customer.first_name|default:"Not set" }} {{ user.customer.last_name|default:"" }}</p>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Email Address</label>
+            <p style="color: white; font-size: 16px; margin: 5px 0 0 0;">{{ customer.user.email|default:"Not set" }}</p>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Phone Number</label>
+            <p style="color: white; font-size: 16px; margin: 5px 0 0 0;">{{ customer.phone|default:"Not set" }}</p>
+        </div>
+
+        <div>
+            <label style="color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Default Delivery Address</label>
+            <p style="color: white; font-size: 16px; margin: 5px 0 0 0; line-height: 1.5;">{{ customer.address|default:"No address saved yet." }}</p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

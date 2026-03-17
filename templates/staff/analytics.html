@@ -1,0 +1,117 @@
+{% extends 'staff/admin_dashboard.html' %} 
+{% load static %}
+
+{% block content %}
+<main style="flex: 1; padding: 30px; overflow-y: auto; background: var(--bg-dark);">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h2 style="color: white; font-weight: 500;">7-Day Sales Report</h2>
+            <p style="color: var(--text-muted); font-size: 14px;">Summary and breakdown of recent completed sales.</p>
+        </div>
+        <button onclick="window.print()" class="btn" style="width: auto; padding: 10px 20px; background: var(--bg-surface); border: 1px solid var(--border-color);">
+            🖨️ Print Report
+        </button>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <div style="background: var(--bg-panel); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); border-left: 4px solid var(--accent);">
+            <p style="color: var(--text-muted); font-size: 13px; text-transform: uppercase; margin-bottom: 5px;">Total Revenue</p>
+            <h3 style="color: white; font-size: 28px;">₱{{ total_revenue|floatformat:2 }}</h3>
+        </div>
+        <div style="background: var(--bg-panel); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); border-left: 4px solid #2ecc71;">
+            <p style="color: var(--text-muted); font-size: 13px; text-transform: uppercase; margin-bottom: 5px;">Completed Orders</p>
+            <h3 style="color: white; font-size: 28px;">{{ total_orders }}</h3>
+        </div>
+        <div style="background: var(--bg-panel); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); border-left: 4px solid #3498db;">
+            <p style="color: var(--text-muted); font-size: 13px; text-transform: uppercase; margin-bottom: 5px;">Avg. Order Value</p>
+            <h3 style="color: white; font-size: 28px;">₱{{ avg_order|floatformat:2 }}</h3>
+        </div>
+    </div>
+
+    <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px; margin-bottom: 30px;">
+        <h3 style="color: white; margin-bottom: 20px; font-weight: 500; font-size: 16px;">Revenue Trend</h3>
+        <div style="position: relative; height: 300px; width: 100%;">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+
+    <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
+        <div style="padding: 20px; border-bottom: 1px solid var(--border-color);">
+            <h3 style="color: white; font-weight: 500; font-size: 16px;">Detailed Sales Breakdown</h3>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="background: var(--bg-surface); color: var(--text-muted); font-size: 13px; text-transform: uppercase;">
+                    <th style="padding: 15px 20px;">Date & Time</th>
+                    <th style="padding: 15px 20px;">Order #</th>
+                    <th style="padding: 15px 20px;">Type</th>
+                    <th style="padding: 15px 20px;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 15px 20px; color: #ddd; font-size: 14px;">{{ order.order_date|date:"M j, Y - g:i A" }}</td>
+                    <td style="padding: 15px 20px; color: white; font-weight: 500;">#{{ order.id }}</td>
+                    <td style="padding: 15px 20px;">
+                        {% if order.user.is_staff %}
+                            <span style="color: #9b59b6; font-size: 12px; font-weight: 600;">Walk-in</span>
+                        {% else %}
+                            <span style="color: #3498db; font-size: 12px; font-weight: 600;">Online</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 15px 20px; color: var(--accent); font-weight: 600;">₱{{ order.total_amount }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="padding: 30px; text-align: center; color: var(--text-muted);">No completed orders in the last 7 days.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const chartLabels = JSON.parse('{{ dates|safe }}');
+    const chartData = JSON.parse('{{ sales|safe }}');
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: 'Daily Revenue (₱)',
+                data: chartData,
+                borderColor: '#ff7a00',
+                backgroundColor: 'rgba(255, 122, 0, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false } // Hidden for a cleaner report look
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#888888' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#888888' }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -9,6 +9,7 @@ from products.models import Product
 from orders.models import Order, OrderItem, Payment
 from django.utils import timezone
 import datetime
+from django.db.models import Sum, Avg
 
 def is_store_open():
     """Returns True if current time is within operating hours (8am - 8pm)"""
@@ -16,8 +17,8 @@ def is_store_open():
     current_time = timezone.localtime().time()
     
     # Set your open and close times (24-hour format)
-    opening_time = datetime.time(10, 0)   # 8:00 AM
-    closing_time = datetime.time(20, 0)  # 8:00 PM
+    opening_time = datetime.time(1, 0)   # 8:00 AM
+    closing_time = datetime.time(23, 0 )  # 8:00 PM
     
     return opening_time <= current_time <= closing_time
 
@@ -309,3 +310,47 @@ def process_checkout(request):
             return JsonResponse({'success': False, 'error': str(e)})
             
     return JsonResponse({'success': True, 'message': 'Payment successful!', 'order_id': order.id})
+
+@login_required(login_url='login')
+def sales_analytics(request):
+    """Generates a 7-Day Sales Report."""
+    if not request.user.is_staff:
+        return redirect('products:menu_list')
+
+    today = timezone.now().date()
+    seven_days_ago = today - datetime.timedelta(days=6)
+
+    # 1. Get all completed orders from the last 7 days
+    completed_orders = Order.objects.filter(
+        order_date__date__gte=seven_days_ago, 
+        status='Completed'
+    ).order_by('-order_date')
+
+    # 2. Calculate the "Big Numbers" for the report
+    total_revenue = completed_orders.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+    total_orders = completed_orders.count()
+    avg_order = completed_orders.aggregate(Avg('total_amount'))['total_amount__avg'] or 0
+
+    # 3. Build the daily chart data
+    dates_list = []
+    sales_list = []
+
+    for i in range(6, -1, -1):
+        target_date = today - datetime.timedelta(days=i)
+        dates_list.append(target_date.strftime('%b %d')) 
+        
+        daily_total = completed_orders.filter(
+            order_date__date=target_date
+        ).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+        
+        sales_list.append(float(daily_total))
+
+    context = {
+        'total_revenue': total_revenue,
+        'total_orders': total_orders,
+        'avg_order': avg_order,
+        'recent_orders': completed_orders, # Passing the actual orders to the table
+        'dates': json.dumps(dates_list),
+        'sales': json.dumps(sales_list),
+    }
+    return render(request, 'staff/analytics.html', context)
