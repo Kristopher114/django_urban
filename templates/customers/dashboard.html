@@ -7,6 +7,19 @@
     <title>URBAN - Customer Dashboard</title>
     <link rel="stylesheet" href="{% static 'customers/styles.css' %}">
 </head>
+<style>
+    .cart-badge {
+        background: #ff4c4c; 
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 50%;
+        margin-left: 5px;
+        vertical-align: top;
+        display: inline-block;
+    }
+</style>
 <body>
 
     <div class="navbar" style="position: relative;">
@@ -19,7 +32,12 @@
         </button>
 
         <div class="nav-links" id="mobile-nav">
-            <a href="{% url 'orders:view_cart' %}">My Cart</a>
+            <a href="{% url 'orders:view_cart' %}" style="display: inline-flex; align-items: center; position: relative;">
+                My Cart
+                {% if has_new_items %}
+                    <span style="background: #ff4c4c; width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-left: 6px; box-shadow: 0 0 5px rgba(255,0,0,0.5);"></span>
+                {% endif %}
+            </a>
             <a href="{% url 'products:menu_list' %}">Menu</a>
             <a href="{% url 'orders:customer_orders' %}">My Orders</a>
             <a href="{% url 'customer_profile' %}">Profile</a>

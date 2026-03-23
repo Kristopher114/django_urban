@@ -17,8 +17,8 @@ def is_store_open():
     current_time = timezone.localtime().time()
     
     # Set your open and close times (24-hour format)
-    opening_time = datetime.time(1, 0)   # 8:00 AM
-    closing_time = datetime.time(23, 0 )  # 8:00 PM
+    opening_time = datetime.time(10, 0)   # 8:00 AM
+    closing_time = datetime.time(20, 0 )  # 8:00 PM
     
     return opening_time <= current_time <= closing_time
 
@@ -60,6 +60,7 @@ def view_cart(request):
     
     cart_items = []
     subtotal = Decimal('0.00')
+    current_count = 0  # NEW: We will use this to track how many items they are looking at
     
     # Loop through the session data to build our display list and do the math
     for product_id, item_data in cart.items():
@@ -68,6 +69,7 @@ def view_cart(request):
         item_total = price * quantity
         
         subtotal += item_total
+        current_count += quantity  # NEW: Add this item's quantity to our total count
         
         cart_items.append({
             'product_id': product_id,
@@ -80,6 +82,10 @@ def view_cart(request):
     # Calculate tax and final total
     tax = subtotal * Decimal('0.12')
     total = subtotal + tax
+    
+    # --- THE MAGIC LINE FOR THE RED DOT ---
+    # Tell Django's session that the user has now "seen" this exact number of items
+    request.session['seen_cart_count'] = current_count
     
     context = {
         'cart_items': cart_items,

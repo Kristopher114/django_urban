@@ -67,6 +67,7 @@ def register(request):
     return render(request, 'customers/register.html', context)
 
 # ── LOGIN  Customer ──────────────────────────────────────────────────────
+# ── LOGIN  Customer ──────────────────────────────────────────────────────
 def customer_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -79,9 +80,11 @@ def customer_login(request):
         else:
             messages.error(request, 'Invalid username or password.')
 
+    # NEW: Grab the categories so the login page can display them as a preview!
+    categories = Category.objects.all()
         
-
-    return render(request, 'customers/login.html')
+    # NEW: Pass them into the context
+    return render(request, 'customers/login.html', {'categories': categories})
 
 @login_required
 def customer_logout(request):
