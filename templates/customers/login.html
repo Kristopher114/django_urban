@@ -6,6 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {%block title%}<title>URBAN - Customer Portal</title>{%endblock%}
     <link rel="stylesheet" href="{% static 'customers/styles.css' %}">
+    <style>
+        /* CSS to position the eye icon nicely inside the input box */
+        .password-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .password-container input {
+            width: 100%;
+            padding-right: 40px; /* Makes room so text doesn't type under the icon */
+            box-sizing: border-box;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 38%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 15px;
+            color: #888;
+            user-select: none; /* Prevents accidentally highlighting the icon */
+        }
+
+        .toggle-password:hover {
+            color: #333; /* Darkens slightly when hovered */
+        }
+    </style>
 </head>
 <body>
     <section class="hero">
@@ -29,12 +57,17 @@
             <form method="post" action="{% url 'customer_login' %}">
                 {% csrf_token %}
                 <input type="text" name="username" placeholder="Username" required>
-                <input type="password" name="password" placeholder="Password" required>
+                
+                <div class="password-container">
+                    <input type="password" name="password" id="id_password" placeholder="Password" required>
+                    <span class="toggle-password" id="togglePassword">show</span>
+                </div>
+
                 <button type="submit">Login</button>
             </form>
             
             <p class="redirect">Don't have an account? <a href="{% url 'register' %}">Register Here</a></p>
-            <p class="redirect"><a href="{% url 'staff_login' %}" target = "_blank">Login as Admin</a></p>
+            <p class="redirect"><a href="{% url 'staff_login' %}" target="_blank">Login as Admin</a></p>
         </div>
     </section>
     {% endblock %}
@@ -44,5 +77,21 @@
         <p>Andres Bonifacio National Highway San Miguel, Iligan City, Philippines, 9200</p>
         <p>(123) 456-7890</p>
     </footer>
+
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordField = document.getElementById('id_password');
+
+        togglePassword.addEventListener('click', function () {
+            // Check if it's currently a password (hidden)
+            const isPassword = passwordField.getAttribute('type') === 'password';
+            
+            // Toggle the type attribute
+            passwordField.setAttribute('type', isPassword ? 'text' : 'password');
+            
+            // Optional: Change the icon to a slashed eye when visible
+            this.textContent = isPassword ? 'hide' : 'show';
+        });
+    </script>
 </body>
 </html>
